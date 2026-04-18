@@ -1,0 +1,596 @@
+{%extends 'base.html'%}
+
+
+{%block title%}<title>VocabuLearner</title>{% endblock%}
+
+
+{%block content%}
+    {%block logo_link %}
+            <a href="{{ url_for('dashboard') }}" class="logo-link">
+                <div class="logo-icon">
+                    <div class="pokeball-mini"></div>
+                    <div class="pokeball-mini"></div>
+                    <div class="pokeball-mini"></div>
+                </div>
+                VocabuLearner
+            </a>
+    {% endblock %}
+    {%block header%}{%endblock%}
+    <div class="dashboard-container">
+        <!-- Back Button Added Here -->
+        <div class="back-button-container">
+            <button class="back-button" onclick="window.location.href='/review'">← Back to Review</button>
+        </div>
+        
+        <div class="welcome-section">
+            <h1>Review Words!</h1>
+        </div>
+
+
+        <!-- Enhanced Flashcard Challenge -->
+        <div class="challenge-container">
+            <div class="challenge-header">
+                <div class="challenge-title">
+                    <span>🏆</span> Flashcard Challenge
+                </div>
+                <div class="challenge-stats">
+                    <div class="stat-badge">
+                        <div class="label">Cards</div>
+                        <div class="value"><span id="current-card">1</span>/<span id="total-cards">10</span></div>
+                        <div class="xp-badge">XP</div>
+                    </div>
+                    <div class="stat-badge">
+                        <div class="label">Score</div>
+                        <div class="value" id="score">0</div>
+                    </div>
+                    <div class="stat-badge">
+                        <div class="label">Streak</div>
+                        <div class="value" id="streak">0<span class="streak-fire">🔥</span></div>
+                    </div>
+                </div>
+            </div>
+           
+            <div class="progress-container1">
+                <div class="progress-info">
+                    <span>Progress</span>
+                    <span id="progress-percent">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+           
+            <div class="timer" id="timer">Time: 0s</div>
+           
+            <div class="flashcard-area">
+                <div class="flashcard" id="flashcard">
+                    <div class="flashcard-front">
+                        <div class="word" id="word-front">Loading...</div>
+                        <div class="part-of-speech" id="part-of-speech-front">Loading...</div>
+                        <div class="hint">Click to flip card</div>
+                    </div>
+                    <div class="flashcard-back">
+                        <div class="word" id="word-back">Loading...</div>
+                        <div class="part-of-speech" id="part-of-speech-back">Loading...</div>
+                        <div class="definition" id="definition">Loading...</div>
+                        <div class="example" id="example">"Loading..."</div>
+                    </div>
+                </div>
+            </div>
+           
+            <div class="challenge-controls">
+                <button class="challenge-btn incorrect" id="btn-dont-know">Don't Know</button>
+                <button class="challenge-btn correct" id="btn-know">I Know This!</button>
+            </div>
+           
+            <div class="completion-message" id="completion-message">
+                <h2>Challenge Complete! 🎉</h2>
+                <div class="xp-earned" id="xp-earned-text">+0 XP Earned!</div>
+                <div class="badge-earned">New Badge: Vocabulary Master!</div>
+                <div class="completion-stats">
+                    <div class="completion-stat">
+                        <div class="label">Score</div>
+                        <div class="value" id="final-score">0</div>
+                    </div>
+                    <div class="completion-stat">
+                        <div class="label">Accuracy</div>
+                        <div class="value" id="accuracy">0%</div>
+                    </div>
+                    <div class="completion-stat">
+                        <div class="label">Time</div>
+                        <div class="value" id="final-time">0s</div>
+                    </div>
+                </div>
+                <button class="challenge-btn" id="btn-restart">Try Another Challenge</button>
+                <!-- Also add Back button in completion message -->
+                <button class="challenge-btn back-to-review" onclick="window.location.href='/review'" style="margin-top: 10px;">Back to Review Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXP Popup Modal -->
+    <div class="modal exp-modal" id="expPopup">
+        <div class="modal-content">
+            <div class="exp-popup-content">
+                <div class="exp-icon">✨</div>
+                <h2>EXP Earned!</h2>
+                <div class="exp-amount" id="expAmount">+0 EXP</div>
+                <p class="exp-message">Your vocabulary knowledge has been rewarded!</p>
+                <div class="exp-details">
+                    <div class="exp-detail">
+                        <span class="label">Correct Answers:</span>
+                        <span class="value" id="popupScore">0</span>
+                    </div>
+                    <div class="exp-detail">
+                        <span class="label">Accuracy:</span>
+                        <span class="value" id="popupAccuracy">0%</span>
+                    </div>
+                    <div class="exp-detail">
+                        <span class="label">Time:</span>
+                        <span class="value" id="popupTime">0s</span>
+                    </div>
+                </div>
+                <button class="btn-confirm" id="btn-close-popup">Awesome! Continue</button>
+                <!-- Also add Back button in EXP popup -->
+                <button class="btn-confirm back-to-review-popup" onclick="window.location.href='/review'" style="background: #666; margin-top: 10px;">Back to Review Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>© 2025 VocabuLearner</p>
+    </footer>
+
+
+    <style>
+        /* EXP Popup Styles */
+        .exp-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .exp-modal.active {
+            display: flex;
+        }
+
+        .exp-popup-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            animation: popupSlide 0.5s ease;
+            border: 4px solid #4CAF50;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes popupSlide {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .exp-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .exp-amount {
+            font-size: 36px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin: 20px 0;
+            text-shadow: 2px 2px 0 #ddd;
+        }
+
+        .exp-message {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 16px;
+        }
+
+        .exp-details {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .exp-detail {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .exp-detail:last-child {
+            border-bottom: none;
+        }
+
+        .exp-detail .label {
+            color: #666;
+        }
+
+        .exp-detail .value {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .btn-confirm {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        /* Back Button Styles */
+        .back-button-container {
+            margin-bottom: 20px;
+        }
+
+        .back-button {
+            background: #f5f5f5;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .back-button:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+        .back-to-review {
+            background: #666;
+        }
+
+        .back-to-review:hover {
+            background: #555;
+        }
+
+        .back-to-review-popup {
+            background: #666;
+        }
+
+        .back-to-review-popup:hover {
+            background: #555;
+        }
+    </style>
+
+    <script>
+        // Game state
+        let vocabulary = [];
+        let currentCardIndex = 0;
+        let score = 0;
+        let streak = 0;
+        let cardsAnswered = 0;
+        let totalCards = 0;
+        let startTime;
+        let timerInterval;
+        let totalExpEarned = 0;
+
+        // DOM elements
+        const flashcard = document.getElementById('flashcard');
+        const wordFront = document.getElementById('word-front');
+        const wordBack = document.getElementById('word-back');
+        const partOfSpeechFront = document.getElementById('part-of-speech-front');
+        const partOfSpeechBack = document.getElementById('part-of-speech-back');
+        const definition = document.getElementById('definition');
+        const example = document.getElementById('example');
+        const currentCardDisplay = document.getElementById('current-card');
+        const totalCardsDisplay = document.getElementById('total-cards');
+        const scoreDisplay = document.getElementById('score');
+        const streakDisplay = document.getElementById('streak');
+        const progressFill = document.getElementById('progress-fill');
+        const progressPercent = document.getElementById('progress-percent');
+        const btnKnow = document.getElementById('btn-know');
+        const btnDontKnow = document.getElementById('btn-dont-know');
+        const completionMessage = document.getElementById('completion-message');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const accuracyDisplay = document.getElementById('accuracy');
+        const finalTimeDisplay = document.getElementById('final-time');
+        const xpEarnedText = document.getElementById('xp-earned-text');
+        const btnRestart = document.getElementById('btn-restart');
+        const timerDisplay = document.getElementById('timer');
+        
+        // Popup elements
+        const expPopup = document.getElementById('expPopup');
+        const expAmount = document.getElementById('expAmount');
+        const popupScore = document.getElementById('popupScore');
+        const popupAccuracy = document.getElementById('popupAccuracy');
+        const popupTime = document.getElementById('popupTime');
+        const btnClosePopup = document.getElementById('btn-close-popup');
+
+        // Load vocabulary from server
+        async function loadVocabulary() {
+            try {
+                const response = await fetch('/api/get_vocabulary_for_review');
+                const data = await response.json();
+                
+                if (data.success && data.words) {
+                    vocabulary = data.words;
+                    totalCards = vocabulary.length;
+                    if (totalCards > 0) {
+                        initGame();
+                    } else {
+                        showNoWordsMessage();
+                    }
+                } else {
+                    showErrorMessage(data.error || 'Failed to load vocabulary');
+                }
+            } catch (error) {
+                console.error('Error loading vocabulary:', error);
+                showErrorMessage('Network error. Please try again.');
+            }
+        }
+
+        function showNoWordsMessage() {
+            wordFront.textContent = "No Words Available";
+            partOfSpeechFront.textContent = "Add words first";
+            definition.textContent = "You haven't added any words to review yet.";
+            example.textContent = "Go to 'Add New Word' to start building your vocabulary!";
+            btnKnow.disabled = true;
+            btnDontKnow.disabled = true;
+        }
+
+        function showErrorMessage(message) {
+            wordFront.textContent = "Error";
+            partOfSpeechFront.textContent = "Oops";
+            definition.textContent = message;
+            example.textContent = "Please try again later.";
+            btnKnow.disabled = true;
+            btnDontKnow.disabled = true;
+        }
+
+        // Initialize the game
+        function initGame() {
+            currentCardIndex = 0;
+            score = 0;
+            streak = 0;
+            cardsAnswered = 0;
+            totalExpEarned = 0;
+            updateDisplay();
+            loadCard(currentCardIndex);
+            completionMessage.style.display = 'none';
+            
+            // Reset flashcard to front side
+            flashcard.classList.remove('flipped');
+            
+            // Show game controls
+            btnKnow.style.display = 'block';
+            btnDontKnow.style.display = 'block';
+            document.querySelector('.flashcard-area').style.display = 'block';
+            
+            // Start timer
+            startTime = new Date();
+            clearInterval(timerInterval);
+            timerInterval = setInterval(updateTimer, 1000);
+            updateTimer();
+        }
+
+        // Update timer
+        function updateTimer() {
+            const currentTime = new Date();
+            const elapsedSeconds = Math.floor((currentTime - startTime) / 1000);
+            timerDisplay.textContent = `Time: ${elapsedSeconds}s`;
+        }
+
+        // Load a card
+        function loadCard(index) {
+            if (vocabulary.length === 0) return;
+            
+            const card = vocabulary[index];
+            wordFront.textContent = card.word;
+            wordBack.textContent = card.word;
+            partOfSpeechFront.textContent = card.category || "N/A";
+            partOfSpeechBack.textContent = card.category || "N/A";
+            definition.textContent = card.definition;
+            example.textContent = `"${card.example_sentence}"`;
+        
+            // Reset card to front
+            flashcard.classList.remove('flipped');
+        }
+
+        // Update display elements
+        function updateDisplay() {
+            currentCardDisplay.textContent = currentCardIndex + 1;
+            totalCardsDisplay.textContent = totalCards;
+            scoreDisplay.textContent = score;
+            streakDisplay.textContent = `${streak}🔥`;
+        
+            const progress = (cardsAnswered / totalCards) * 100;
+            progressFill.style.width = `${progress}%`;
+            progressPercent.textContent = `${Math.round(progress)}%`;
+        }
+
+        // Create floating XP animation
+        function createFloatingXP(x, y, amount) {
+            const floatingXP = document.createElement('div');
+            floatingXP.className = 'floating-xp';
+            floatingXP.textContent = `+${amount} XP`;
+            floatingXP.style.left = `${x}px`;
+            floatingXP.style.top = `${y}px`;
+            document.querySelector('.challenge-container').appendChild(floatingXP);
+        
+            setTimeout(() => {
+                floatingXP.remove();
+            }, 1000);
+        }
+
+        // Handle card flip
+        flashcard.addEventListener('click', function() {
+            this.classList.toggle('flipped');
+        });
+
+        // Handle "I Know This" button
+        btnKnow.addEventListener('click', async function(e) {
+            if (vocabulary.length === 0) return;
+            
+            score++;
+            streak++;
+            cardsAnswered++;
+        
+            // Create floating XP
+            createFloatingXP(e.clientX, e.clientY, 10);
+        
+            updateDisplay();
+            nextCard();
+        });
+
+        // Handle "Don't Know" button
+        btnDontKnow.addEventListener('click', function() {
+            if (vocabulary.length === 0) return;
+            
+            streak = 0;
+            cardsAnswered++;
+            updateDisplay();
+            nextCard();
+        });
+
+        // Move to next card or end game
+        function nextCard() {
+            currentCardIndex++;
+        
+            if (currentCardIndex < totalCards) {
+                loadCard(currentCardIndex);
+            } else {
+                endGame();
+            }
+        }
+
+        // End the game
+        async function endGame() {
+            clearInterval(timerInterval);
+            const endTime = new Date();
+            const elapsedSeconds = Math.floor((endTime - startTime) / 1000);
+        
+            const accuracy = Math.round((score / totalCards) * 100);
+            
+            // Calculate EXP earned (10 EXP per correct answer + bonus for accuracy)
+            totalExpEarned = score * 10;
+            if (accuracy >= 80) totalExpEarned += 20; // Bonus for high accuracy
+            if (elapsedSeconds < 60) totalExpEarned += 10; // Bonus for speed
+            
+            // Hide game controls and show completion message
+            btnKnow.style.display = 'none';
+            btnDontKnow.style.display = 'none';
+            document.querySelector('.flashcard-area').style.display = 'none';
+            
+            // Update completion message
+            finalScoreDisplay.textContent = score;
+            accuracyDisplay.textContent = `${accuracy}%`;
+            finalTimeDisplay.textContent = `${elapsedSeconds}s`;
+            xpEarnedText.textContent = `+${totalExpEarned} XP Earned!`;
+            completionMessage.style.display = 'block';
+            
+            // Update popup details
+            popupScore.textContent = score;
+            popupAccuracy.textContent = `${accuracy}%`;
+            popupTime.textContent = `${elapsedSeconds}s`;
+            expAmount.textContent = `+${totalExpEarned} EXP`;
+            
+            // Show popup after a short delay
+            setTimeout(() => {
+                expPopup.classList.add('active');
+            }, 500);
+            
+            // Send EXP to server to update user account
+            await updateUserExp(totalExpEarned);
+        }
+
+        // Update user EXP on server
+        async function updateUserExp(expAmount) {
+            try {
+                const response = await fetch('/api/add_review_exp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        exp_earned: expAmount,
+                        score: score,
+                        accuracy: Math.round((score / totalCards) * 100),
+                        time_seconds: Math.floor((new Date() - startTime) / 1000)
+                    })
+                });
+                
+                const data = await response.json();
+                if (!data.success) {
+                    console.error('Failed to update user EXP:', data.error);
+                }
+            } catch (error) {
+                console.error('Error updating user EXP:', error);
+            }
+        }
+
+        // Close popup and reset game
+        btnClosePopup.addEventListener('click', function() {
+            expPopup.classList.remove('active');
+            // Shuffle vocabulary and restart game
+            shuffleVocabulary();
+            initGame();
+        });
+
+        // Restart the game
+        btnRestart.addEventListener('click', function() {
+            // Hide completion message
+            completionMessage.style.display = 'none';
+            // Shuffle vocabulary for new game
+            shuffleVocabulary();
+            initGame();
+        });
+
+        // Shuffle vocabulary array
+        function shuffleVocabulary() {
+            for (let i = vocabulary.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [vocabulary[i], vocabulary[j]] = [vocabulary[j], vocabulary[i]];
+            }
+        }
+
+        // Initialize when page loads
+        window.addEventListener('DOMContentLoaded', loadVocabulary);
+    </script>
+{%endblock%}

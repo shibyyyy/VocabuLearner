@@ -1,0 +1,1540 @@
+{%extends "base.html"%}
+{%block title%}
+    <title>Pokémon Configuration - VocabuLearner Admin</title>
+{%endblock%}
+
+{%block content%}
+{%block logo_link %}
+            <a href="{{ url_for('admin_dashboard') }}" class="logo-link">
+                <div class="logo-icon">
+                    <div class="pokeball-mini"></div>
+                    <div class="pokeball-mini"></div>
+                    <div class="pokeball-mini"></div>
+                </div>
+                VocabuLearner
+            </a>
+    {% endblock %}
+    {%block header%}
+        <div class="header-actions">
+            <button class="back-btn1" onclick="goToDashboard()">Back to Dashboard</button>
+            <button class="logout-btn0" onclick="showLogoutConfirm()">Logout</button>
+        </div>
+    {%endblock%}
+    <style>
+        .management-container {
+            margin-top: 120px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .page-header {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border: 4px solid #000;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 8px 8px 0 #000;
+            text-align: center;
+        }
+        .page-header h1 {
+            font-size: 24px;
+            color: #ffd700;
+            text-shadow: 4px 4px 0 #000;
+            margin-bottom: 15px;
+        }
+        .page-header p {
+            font-size: 12px;
+            color: #fff;
+            text-shadow: 2px 2px 0 #000;
+            margin-bottom: 20px;
+        }
+
+        .current-pokemon {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border: 4px solid #000;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 8px 8px 0 #000;
+        }
+        .current-pokemon h2 {
+            font-size: 18px;
+            color: #ffd700;
+            text-shadow: 3px 3px 0 #000;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+       
+        .search-add-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+       
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+            max-width: 500px;
+        }
+       
+        .search-container {
+            display: flex;
+            gap: 10px;
+        }
+       
+        .search-input {
+            flex: 1;
+            padding: 12px;
+            border: 3px solid #000;
+            background: rgba(255,255,255,0.9);
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            box-shadow: 4px 4px 0 #000;
+        }
+       
+        .search-btn {
+            background: #4169e1;
+            color: #fff;
+            border: 3px solid #000;
+            padding: 12px 20px;
+            font-size: 10px;
+            box-shadow: 4px 4px 0 #000;
+            cursor: pointer;
+            font-family: 'Press Start 2P', monospace;
+            white-space: nowrap;
+        }
+       
+        .search-btn:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #000;
+        }
+
+        .clear-btn {
+            background: #ff4444;
+            color: #fff;
+            border: 3px solid #000;
+            padding: 12px 20px;
+            font-size: 10px;
+            box-shadow: 4px 4px 0 #000;
+            cursor: pointer;
+            font-family: 'Press Start 2P', monospace;
+            white-space: nowrap;
+        }
+       
+        .clear-btn:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #000;
+        }
+       
+        .add-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+       
+        .pokemon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+            max-width: 100%;
+        }
+       
+        .pokemon-item {
+            background: rgba(0,0,0,0.2);
+            border: 3px solid #000;
+            padding: 20px;
+            transition: all 0.3s;
+            min-height: 320px;
+            overflow: hidden;
+            word-wrap: break-word;
+            position: relative;
+        }
+        .pokemon-item:hover {
+            transform: translateY(-5px);
+            background: rgba(0,0,0,0.3);
+        }
+        .pokemon-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 15px;
+            min-height: 80px;
+        }
+        .pokemon-icon {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .pokemon-icon img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+        .pokemon-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .pokemon-name {
+            font-size: 16px;
+            color: #ffd700;
+            text-shadow: 2px 2px 0 #000;
+            margin-bottom: 5px;
+        }
+        .pokemon-id {
+            font-size: 14px;
+            color: #fff;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+        .pokemon-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .stat-item {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid #000;
+            padding: 8px;
+            text-align: center;
+            min-width: 0;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #fff;
+            opacity: 0.8;
+            display: block;
+            margin-bottom: 3px;
+        }
+        .stat-value {
+            font-size: 24px;
+            color: #ffd700;
+            text-shadow: 1px 1px 0 #000;
+            display: block;
+        }
+       
+        .family-section {
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border: 2px solid #000;
+            border-radius: 5px;
+        }
+        .family-header {
+            font-size: 9px;
+            color: #ffd700;
+            text-shadow: 1px 1px 0 #000;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+        .family-members {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .family-member {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 5px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            min-width: 50px;
+        }
+        .family-member-icon {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .family-member-icon img {
+            width: 25px;
+            height: 25px;
+            object-fit: contain;
+        }
+        .family-member-name {
+            font-size: 7px;
+            color: #fff;
+            text-align: center;
+            margin-top: 3px;
+        }
+        .family-member.current {
+            background: rgba(76, 200, 66, 0.3);
+            border: 1px solid #4cc842;
+        }
+       
+        .rarity-common { color: #fff; font-size: 14px; }
+        .rarity-uncommon { color: #4d96ff; font-size: 14px; }
+        .rarity-rare { color: #76c442; font-size: 14px; }
+        .rarity-epic { color: #9b59b6; font-size: 14px; }
+        .rarity-legendary { color: #ffd700; font-size: 14px; }
+        .rarity-starter { color: #ff6b6b; font-weight: bold; font-size: 14px; }
+        .pokemon-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .pokemon-selector-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .pokemon-selector-modal.active {
+            display: flex;
+        }
+        .pokemon-selector-content {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border: 4px solid #000;
+            padding: 30px;
+            max-width: 1000px;
+            width: 95%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 12px 12px 0 #000;
+            overflow-y: auto;
+        }
+        .pokemon-selector-content h2 {
+            font-size: 20px;
+            color: #228b22;
+            text-shadow: 3px 3px 0 #ffd700;
+            margin-bottom: 20px;
+            text-align: center;
+           
+        }
+        .pokemon-search {
+            margin-bottom: 20px;
+        }
+        .selector-search-input {
+            width: 100%;
+            padding: 12px;
+            border: 3px solid #000;
+            background: rgba(255,255,255,0.9);
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            box-shadow: 4px 4px 0 #000;
+            margin-bottom: 15px;
+        }
+        .selector-pokemon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .pokemon-option {
+            background: rgba(255,255,255,0.9);
+            border: 3px solid #000;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .pokemon-option:hover {
+            transform: scale(1.05);
+            background: rgba(255,107,107,0.3);
+        }
+        .pokemon-option.selected {
+            background: rgba(76, 200, 66, 0.3);
+            border-color: #4cc842;
+        }
+        .pokemon-option-icon {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .pokemon-option-icon img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+        .pokemon-option-name {
+            font-size: 10px;
+            color: #000;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .pokemon-option-id {
+            font-size: 9px;
+            color: #666;
+        }
+        .pokemon-selector-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .configure-form-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2001;
+            justify-content: center;
+            align-items: center;
+        }
+        .configure-form-modal.active {
+            display: flex;
+        }
+        .configure-form-content {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border: 4px solid #000;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 12px 12px 0 #000;
+        }
+        .configure-form-content h2 {
+            font-size: 20px;
+            color: #228b22;
+            text-shadow: 3px 3px 0 #ffd700;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+       
+        .selected-pokemon-preview {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border: 3px solid #000;
+            border-radius: 5px;
+        }
+        .selected-pokemon-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .selected-pokemon-icon img {
+            width: 90px;
+            height: 90px;
+            object-fit: contain;
+        }
+        .selected-pokemon-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 5px;
+        }
+        .selected-pokemon-id {
+            font-size: 12px;
+            color: #666;
+        }
+       
+        .evolution-line-section {
+            margin: 25px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border: 3px solid #000;
+            border-radius: 5px;
+        }
+        .evolution-line-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #228b22;
+            text-align: center;
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 0 #ffd700;
+        }
+        .evolution-line {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .evolution-stage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .evolution-stage-icon {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+        .evolution-stage-icon img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+        .evolution-stage-name {
+            font-size: 11px;
+            font-weight: bold;
+            color: #000;
+        }
+        .evolution-stage-points {
+            font-size: 9px;
+            color: #666;
+            margin-top: 3px;
+        }
+        .evolution-arrow {
+            font-size: 20px;
+            color: #228b22;
+            font-weight: bold;
+        }
+       
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: block;
+            font-size: 10px;
+            color: #000;
+            margin-bottom: 8px;
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
+        }
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 3px solid #000;
+            background: rgba(255,255,255,0.9);
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            box-shadow: 4px 4px 0 #000;
+        }
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 3px solid #000;
+            background: rgba(255,255,255,0.9);
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            box-shadow: 4px 4px 0 #000;
+        }
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border: 4px solid #000;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 12px 12px 0 #000;
+            text-align: center;
+        }
+        .modal-content h2 {
+            font-size: 20px;
+            color: #228b22;
+            text-shadow: 3px 3px 0 #ffd700;
+            margin-bottom: 20px;
+        }
+        .modal-content p {
+            font-size: 12px;
+            color: #000;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .btn-confirm0 {
+            background: #76c442;
+            color: #fff;
+            border: 4px solid #000;
+            padding: 12px 25px;
+            font-size: 12px;
+            box-shadow: 6px 6px 0 #000;
+            cursor: pointer;
+            font-family: 'Press Start 2P', monospace;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-cancel1 {
+            background: #ff4444;
+            color: #fff;
+            border: 4px solid #000;
+            padding: 12px 25px;
+            font-size: 12px;
+            box-shadow: 6px 6px 0 #000;
+            cursor: pointer;
+            font-family: 'Press Start 2P', monospace;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-confirm0:hover, .btn-cancel1:hover {
+            transform: translate(3px, 3px);
+            box-shadow: 3px 3px 0 #000;
+        }
+
+        .action-btn {
+            background: #4169e1;
+            color: #fff;
+            border: 3px solid #000;
+            padding: 8px 15px;
+            font-size: 10px;
+            box-shadow: 4px 4px 0 #000;
+            cursor: pointer;
+            font-family: 'Press Start 2P', monospace;
+            flex: 1;
+            min-width: 80px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .action-btn:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #000;
+        }
+        .action-btn.green {
+            background: #76c442;
+        }
+        .action-btn.red {
+            background: #ff4444;
+        }
+        .action-btn.blue {
+            background: #4169e1;
+        }
+        .action-btn.starter {
+            background: #ff6b6b;
+            color: #fff;
+        }
+        .back-btn1 {
+            background: #4169e1;
+            color: #fff;
+            border: 3px solid #000;
+            padding: 8px 15px;
+            font-size: 10px;
+            box-shadow: 4px 4px 0 #000;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-family: 'Press Start 2P', monospace;
+            transition: all 0.2s;
+        }
+        .back-btn1:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #000;
+            background: #3558c7;
+        }
+        
+        .logout-btn0 {
+            background: #ff4444;
+            color: #fff;
+            border: 3px solid #000;
+            padding: 8px 15px;
+            font-size: 10px;
+            box-shadow: 4px 4px 0 #000;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-family: 'Press Start 2P', monospace;
+            transition: all 0.2s;
+        }
+        .logout-btn:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #000;
+            background: #ff3333;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            color: #fff;
+            font-size: 10px;
+            text-shadow: 2px 2px 0 #000;
+        }
+       
+        .results-count {
+            text-align: center;
+            color: #fff;
+            font-size: 11px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 0 #000;
+        }
+       
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #fff;
+            font-size: 12px;
+        }
+
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .pagination-btn {
+            background: #4169e1;
+            color: #fff;
+            border: 3px solid #000;
+            padding: 8px 15px;
+            font-size: 10px;
+            box-shadow: 4px 4px 0 #000;
+            cursor: pointer;
+            font-family: 'Press Start 2P', monospace;
+            min-width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #000;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-info {
+            color: #fff;
+            font-size: 10px;
+            text-shadow: 2px 2px 0 #000;
+            margin: 0 10px;
+        }
+
+        .page-input-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .page-input {
+            width: 50px;
+            padding: 5px;
+            border: 2px solid #000;
+            background: rgba(255,255,255,0.9);
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            text-align: center;
+        }
+
+        .page-input-btn {
+            background: #76c442;
+            color: #fff;
+            border: 2px solid #000;
+            padding: 5px 10px;
+            font-size: 9px;
+            cursor: pointer;
+            font-family: 'Press Start 2P', monospace;
+        }
+
+        .page-input-btn:hover {
+            transform: translate(1px, 1px);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 900px) {
+            .pokemon-grid {
+                grid-template-columns: 1fr;
+            }
+           
+            .selector-pokemon-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+           
+            .header-actions {
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+           
+            .search-add-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+           
+            .search-box {
+                min-width: 100%;
+            }
+           
+            .add-buttons {
+                justify-content: center;
+            }
+           
+            .evolution-line {
+                flex-direction: column;
+            }
+            .evolution-arrow {
+                transform: rotate(90deg);
+            }
+           
+            .btn-confirm0, .btn-cancel1 {
+                height: 45px;
+                padding: 10px 20px;
+                font-size: 11px;
+            }
+
+            .pagination-controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+       
+        .pokemon-selector-actions .btn-confirm0,
+        .pokemon-selector-actions .btn-cancel1 {
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+       
+        .form-actions .btn-confirm0,
+        .form-actions .btn-cancel1 {
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+
+    <div class="management-container">
+        <div class="page-header">
+            <h1>Starter Pokémon Configuration</h1>
+            <p>Manage Starter Pokémon. Only starter Pokémon and their families are shown.</p>
+        </div>
+
+        <div class="current-pokemon">
+            <h2>Starter Pokémon</h2>
+            <div class="search-add-section">
+                <div class="search-box">
+                    <form class="search-container" id="searchForm" onsubmit="searchPokemon(event)">
+                        <input type="text" class="search-input" id="searchInput" name="search"
+                            placeholder="Search starter Pokémon by name, ID, or family..."
+                            value="{{ form.search.data or '' }}">
+                        <button type="submit" class="search-btn">Search</button>
+                        <button type="button" class="clear-btn" onclick="clearSearch()">Clear</button>
+                    </form>
+                </div>
+                <div class="add-buttons">
+                    <button class="action-btn starter" onclick="showStarterPokemonSelector()">+ Add New Starter Pokémon</button>
+                </div>
+            </div>
+
+            <div class="results-count" id="resultsCount">
+                Loading Starter Pokémon...
+            </div>
+           
+            <div class="pokemon-grid" id="currentPokemonGrid">
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                    <p style="color: #fff; font-size: 12px;">Loading Starter Pokémon from database...</p>
+                </div>
+            </div>
+
+            <div class="pagination-controls" id="paginationControls" style="display: none;">
+                <button class="pagination-btn" id="firstPageBtn" onclick="goToPage(1)">««</button>
+                <button class="pagination-btn" id="prevPageBtn" onclick="goToPreviousPage()">«</button>
+                <span class="pagination-info" id="pageInfo">Page 1 of 1</span>
+                <button class="pagination-btn" id="nextPageBtn" onclick="goToNextPage()">»</button>
+                <button class="pagination-btn" id="lastPageBtn" onclick="goToLastPage()">»»</button>
+                <div class="page-input-container">
+                    <input type="number" class="page-input" id="pageInput" min="1" value="1">
+                    <button class="page-input-btn" onclick="goToSpecificPage()">Go</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="pokemon-selector-modal" id="starterSelectorModal">
+        <div class="pokemon-selector-content">
+            <h2>Select Starter Pokémon</h2>
+            <p style="text-align: center; font-size: 9px; color: #666; margin-bottom: 20px;">
+                Only common rarity Pokémon can be selected as starters
+            </p>
+           
+            <div class="pokemon-search">
+                <input type="text" class="selector-search-input" placeholder="Search common Pokémon by name..."
+                       id="starterSearch" onkeyup="searchStarterOptions()">
+            </div>
+           
+            <div class="selector-pokemon-grid" id="starterGrid">
+                <div style="grid-column: 1 / -1; text-align: center; padding: 20px;">
+                    <p style="color: #000; font-size: 12px;">Loading available starter Pokémon...</p>
+                </div>
+            </div>
+           
+            <div class="pokemon-selector-actions">
+                <button class="btn-confirm0" onclick="configureStarterPokemon()">Configure as Starter</button>
+                <button class="btn-cancel1" onclick="closeStarterSelector()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="configure-form-modal" id="configureFormModal">
+        <div class="configure-form-content">
+            <h2>Configure Starter Pokémon</h2>
+           
+            <div id="configureFormContent">
+            </div>
+           
+            <div class="form-actions" id="configureFormActions" style="display: none;">
+                <button type="button" class="btn-confirm0" onclick="addPokemonAsStarter()">Add as Starter</button>
+                <button type="button" class="btn-cancel1" onclick="closeConfigureForm()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="evolutionModal">
+        <div class="modal-content">
+            <h2>Evolution Line</h2>
+            <div id="evolutionModalContent">
+                <!-- Evolution content will be loaded here -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel1" onclick="closeModal('evolutionModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="removeStarterModal">
+        <div class="modal-content">
+            <h2>Remove Starter Pokémon</h2>
+            <p>Are you sure you want to remove <span id="removePokemonName"></span> as a starter Pokémon?</p>
+            <p style="font-size: 10px; color: #4169e1; margin-top: 10px;">Note: This will revert the Pokémon's rarity to "common" instead of deleting it.</p>
+           
+            <form id="removeForm" onsubmit="confirmRemoveStarter(event)">
+                <input type="hidden" id="removePokemonId" name="pokemon_id">
+                <div class="modal-actions">
+                    <button type="submit" class="btn-confirm0">Remove as Starter</button>
+                    <button type="button" class="btn-cancel1" onclick="closeModal('removeStarterModal')">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="logoutModal">
+        <div class="modal-content">
+            <h2>Confirm Logout</h2>
+            <p>Are you sure you want to logout?</p>
+            <div class="modal-actions">
+                <button class="btn-confirm0" onclick="performLogout()">Yes, Logout</button>
+                <button class="btn-cancel1" onclick="closeModal('logoutModal')">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>© 2025 VocabuLearner - Pokémon Configuration v1.0</p>
+    </footer>
+
+    <script>
+        let selectedStarterPokemon = null;
+        let pokemonToRemove = null;
+        let allPokemonData = [];
+        let currentSearchTerm = '';
+        let pokemonFamilies = {};
+        let selectedPokemonEvolutionLine = [];
+        let currentPage = 1;
+        let itemsPerPage = 12;
+        let filteredPokemonData = [];
+
+        window.onload = function() {
+            loadCurrentPokemon();
+        };
+
+        async function loadCurrentPokemon() {
+            try {
+                const response = await fetch('/admin/api/pokemon/starters');
+                const data = await response.json();
+               
+                if (data.success) {
+                    allPokemonData = data.pokemon;
+                    filteredPokemonData = [...allPokemonData];
+                    organizePokemonByFamily();
+                    displayPokemonPage(1);
+                } else {
+                    showError('Error loading Pokémon: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error loading Pokémon:', error);
+                showError('Error loading Pokémon from database');
+            }
+        }
+
+        function organizePokemonByFamily() {
+            pokemonFamilies = {};
+            // Only organize starter Pokémon
+            const starterPokemon = allPokemonData.filter(p => p.rarity === 'starter');
+            starterPokemon.forEach(pokemon => {
+                const familyId = pokemon.family_id;
+                if (!pokemonFamilies[familyId]) {
+                    pokemonFamilies[familyId] = [];
+                }
+                pokemonFamilies[familyId].push(pokemon);
+            });
+        }
+
+        function displayPokemonPage(page) {
+            const grid = document.getElementById('currentPokemonGrid');
+            const resultsCount = document.getElementById('resultsCount');
+            const paginationControls = document.getElementById('paginationControls');
+            
+            grid.innerHTML = '';
+
+            // Filter to show ONLY starter Pokémon
+            const starterPokemon = filteredPokemonData.filter(p => p.rarity === 'starter');
+            
+            if (starterPokemon.length === 0) {
+
+                resultsCount.innerHTML = `No starter Pokémon found`;
+                paginationControls.style.display = 'none';
+                return;
+            }
+
+            const totalPages = Math.ceil(starterPokemon.length / itemsPerPage);
+            currentPage = Math.max(1, Math.min(page, totalPages));
+            
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, starterPokemon.length);
+            const currentPagePokemon = starterPokemon.slice(startIndex, endIndex);
+
+            resultsCount.innerHTML = `Showing ${startIndex + 1}-${endIndex} of ${starterPokemon.length} Starter Pokémon${currentSearchTerm ? ` for "${currentSearchTerm}"` : ''}`;
+
+            currentPagePokemon.forEach(pokemon => {
+                const pokemonItem = document.createElement('div');
+                pokemonItem.className = 'pokemon-item';
+                
+                const rarityClass = `rarity-${pokemon.rarity}`;
+                
+                // Create action buttons for starter Pokémon only
+                let actionButtonsHTML = `
+                    <button class="action-btn" onclick="viewEvolution(${pokemon.pokemon_id}, '${pokemon.name.replace(/'/g, "\\'")}', ${pokemon.family_id})">View Evolution</button>
+                    <button class="action-btn red" onclick="removeStarterPokemon(${pokemon.pokemon_id}, '${pokemon.name.replace(/'/g, "\\'")}')">Remove as Starter</button>
+                `;
+                
+                pokemonItem.innerHTML = `
+                    <div class="pokemon-header">
+                        <div class="pokemon-icon">
+                            <img src="${pokemon.url}" alt="${pokemon.name}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png'">
+                        </div>
+                        <div class="pokemon-info">
+                            <div class="pokemon-name">${pokemon.name}</div>
+                            <div class="pokemon-id">ID: ${pokemon.pokemon_id}</div>
+                            <div class="${rarityClass}" style="font-size: 9px; text-transform: uppercase;">
+                                ${pokemon.rarity}
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="pokemon-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Min Points</span>
+                            <span class="stat-value">${pokemon.min_points_required}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Family ID</span>
+                            <span class="stat-value">${pokemon.family_id}</span>
+                        </div>
+                    </div>
+                
+                    <div class="pokemon-actions">
+                        ${actionButtonsHTML}
+                    </div>
+                `;
+                
+                grid.appendChild(pokemonItem);
+            });
+
+            updatePaginationControls(totalPages);
+        }
+
+        async function viewEvolution(pokemonId, pokemonName, familyId) {
+            try {
+                const response = await fetch(`/admin/api/pokemon/family/${familyId}`);
+                const data = await response.json();
+               
+                if (data.success) {
+                    const evolutionLine = data.pokemon;
+                   
+                    // Create evolution line HTML
+                    let evolutionLineHTML = '';
+                    if (evolutionLine.length > 0) {
+                        evolutionLineHTML = `
+                            <div class="evolution-line-section">
+                                <div class="evolution-line-title">Evolution Line for ${pokemonName} (Family ID: ${familyId})</div>
+                                <div class="evolution-line">
+                                    ${evolutionLine.map((pokemon, index) => `
+                                        ${index > 0 ? '<div class="evolution-arrow">→</div>' : ''}
+                                        <div class="evolution-stage">
+                                            <div class="evolution-stage-icon">
+                                                <img src="${pokemon.url}" alt="${pokemon.name}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png'">
+                                            </div>
+                                            <div class="evolution-stage-name">${pokemon.name}</div>
+                                            <div class="evolution-stage-points">${pokemon.min_points_required} pts</div>
+                                            <div style="font-size:8px;color:#666;margin-top:3px;">${pokemon.rarity.toUpperCase()}</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+                   
+                    document.getElementById('evolutionModalContent').innerHTML = evolutionLineHTML;
+                    document.getElementById('evolutionModal').classList.add('active');
+                } else {
+                    showError('Error loading evolution line: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error loading evolution line:', error);
+                showError('Error loading Pokémon evolution line');
+            }
+        }
+
+        function updatePaginationControls(totalPages) {
+            const paginationControls = document.getElementById('paginationControls');
+            const pageInfo = document.getElementById('pageInfo');
+            const firstPageBtn = document.getElementById('firstPageBtn');
+            const prevPageBtn = document.getElementById('prevPageBtn');
+            const nextPageBtn = document.getElementById('nextPageBtn');
+            const lastPageBtn = document.getElementById('lastPageBtn');
+            const pageInput = document.getElementById('pageInput');
+
+            if (totalPages <= 1) {
+                paginationControls.style.display = 'none';
+                return;
+            }
+
+            paginationControls.style.display = 'flex';
+            pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+            pageInput.value = currentPage;
+            pageInput.max = totalPages;
+
+            firstPageBtn.disabled = currentPage === 1;
+            prevPageBtn.disabled = currentPage === 1;
+            nextPageBtn.disabled = currentPage === totalPages;
+            lastPageBtn.disabled = currentPage === totalPages;
+        }
+
+        function goToPage(page) {
+            const totalPages = Math.ceil(filteredPokemonData.length / itemsPerPage);
+            if (page >= 1 && page <= totalPages) {
+                displayPokemonPage(page);
+            }
+        }
+
+        function goToPreviousPage() {
+            if (currentPage > 1) {
+                goToPage(currentPage - 1);
+            }
+        }
+
+        function goToNextPage() {
+            const totalPages = Math.ceil(filteredPokemonData.length / itemsPerPage);
+            if (currentPage < totalPages) {
+                goToPage(currentPage + 1);
+            }
+        }
+
+        function goToFirstPage() {
+            goToPage(1);
+        }
+
+        function goToLastPage() {
+            const totalPages = Math.ceil(filteredPokemonData.length / itemsPerPage);
+            goToPage(totalPages);
+        }
+
+        function goToSpecificPage() {
+            const pageInput = document.getElementById('pageInput');
+            const page = parseInt(pageInput.value);
+            goToPage(page);
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            currentSearchTerm = '';
+            filteredPokemonData = [...allPokemonData];
+            displayPokemonPage(1);
+        }
+
+        function searchPokemon(event) {
+            event.preventDefault();
+            const searchInput = document.getElementById('searchInput');
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            currentSearchTerm = searchTerm;
+            
+            if (!searchTerm) {
+                filteredPokemonData = [...allPokemonData];
+            } else {
+                filteredPokemonData = allPokemonData.filter(pokemon => {
+                    if (pokemon.name.toLowerCase().includes(searchTerm)) return true;
+                    if (pokemon.pokemon_id.toString().includes(searchTerm)) return true;
+                    if (pokemon.rarity.toLowerCase().includes(searchTerm)) return true;
+                    if (pokemon.family_id.toString().includes(searchTerm)) return true;
+                    if (pokemon.min_points_required.toString().includes(searchTerm)) return true;
+                    return false;
+                });
+            }
+            
+            displayPokemonPage(1);
+        }
+
+        async function loadCommonPokemon() {
+            try {
+                // Get all common Pokémon
+                const response = await fetch('/admin/api/pokemon/common');
+                const data = await response.json();
+            
+                if (data.success) {
+                    // Get current starter Pokémon to check families
+                    const startersResponse = await fetch('/admin/api/pokemon/starters');
+                    const startersData = await startersResponse.json();
+                    
+                    let commonPokemon = data.pokemon;
+                    
+                    if (startersData.success && startersData.pokemon.length > 0) {
+                        // Get family IDs of existing starters
+                        const starterFamilyIds = new Set();
+                        startersData.pokemon.forEach(p => {
+                            starterFamilyIds.add(p.family_id);
+                        });
+                        
+                        // Filter out common Pokémon whose family already has a starter
+                        commonPokemon = commonPokemon.filter(pokemon => {
+                            return !starterFamilyIds.has(pokemon.family_id);
+                        });
+                    }
+                    
+                    return commonPokemon;
+                }
+                return [];
+            } catch (error) {
+                console.error('Error loading common Pokémon:', error);
+                return [];
+            }
+        }
+
+        async function showStarterPokemonSelector() {
+            try {
+                const commonPokemon = await loadCommonPokemon();
+            
+                if (commonPokemon.length === 0) {
+                    showError('No common Pokémon available. Please add common Pokémon to the database first, OR all common Pokémon families already have a starter Pokémon.');
+                    return;
+                }
+            
+                const modal = document.getElementById('starterSelectorModal');
+                const grid = document.getElementById('starterGrid');
+            
+                grid.innerHTML = '';
+                selectedStarterPokemon = null;
+                document.getElementById('starterSearch').value = '';
+            
+                commonPokemon.forEach(pokemon => {
+                    const pokemonOption = document.createElement('div');
+                    pokemonOption.className = 'pokemon-option';
+                    pokemonOption.dataset.id = pokemon.pokemon_id;
+                    pokemonOption.dataset.name = pokemon.name;
+                    pokemonOption.dataset.url = pokemon.url;
+                    pokemonOption.dataset.familyId = pokemon.family_id;
+                
+                    pokemonOption.onclick = function() {
+                        selectStarterPokemon(this);
+                    };
+                
+                    pokemonOption.innerHTML = `
+                        <div class="pokemon-option-icon">
+                            <img src="${pokemon.url}" alt="${pokemon.name}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png'">
+                        </div>
+                        <div class="pokemon-option-name">${pokemon.name}</div>
+                        <div class="pokemon-option-id">#${pokemon.pokemon_id}</div>
+                        <div style="font-size:8px;color:#666;margin-top:5px;">COMMON</div>
+                    `;
+                
+                    grid.appendChild(pokemonOption);
+                });
+            
+                modal.classList.add('active');
+            } catch (error) {
+                console.error('Error showing starter selector:', error);
+                showError('Error loading Pokémon list');
+            }
+        }
+
+        function closeStarterSelector() {
+            document.getElementById('starterSelectorModal').classList.remove('active');
+        }
+
+        function searchStarterOptions() {
+            const searchTerm = document.getElementById('starterSearch').value.toLowerCase();
+            const pokemonOptions = document.querySelectorAll('#starterGrid .pokemon-option');
+           
+            pokemonOptions.forEach(option => {
+                const name = option.querySelector('.pokemon-option-name').textContent.toLowerCase();
+                const id = option.querySelector('.pokemon-option-id').textContent.toLowerCase();
+               
+                if (name.includes(searchTerm) || id.includes(searchTerm)) {
+                    option.style.display = 'block';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+        }
+
+        function selectStarterPokemon(element) {
+            document.querySelectorAll('#starterGrid .pokemon-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+           
+            element.classList.add('selected');
+           
+            selectedStarterPokemon = {
+                id: element.dataset.id,
+                name: element.dataset.name,
+                url: element.dataset.url,
+                familyId: element.dataset.familyId
+            };
+        }
+
+        async function configureStarterPokemon() {
+            if (selectedStarterPokemon) {
+                try {
+                    const response = await fetch(`/admin/api/pokemon/family/${selectedStarterPokemon.familyId}`);
+                    const data = await response.json();
+                   
+                    if (data.success) {
+                        selectedPokemonEvolutionLine = data.pokemon;
+                        displayConfigureForm();
+                        closeStarterSelector();
+                        document.getElementById('configureFormModal').classList.add('active');
+                    } else {
+                        showError('Error loading evolution line: ' + data.error);
+                    }
+                } catch (error) {
+                    console.error('Error loading evolution line:', error);
+                    showError('Error loading Pokémon evolution line');
+                }
+            } else {
+                showError('Please select a Pokémon first!');
+            }
+        }
+
+        function displayConfigureForm() {
+            const formContent = document.getElementById('configureFormContent');
+            const formActions = document.getElementById('configureFormActions');
+           
+            let evolutionLineHTML = '';
+            if (selectedPokemonEvolutionLine.length > 0) {
+                evolutionLineHTML = `
+                    <div class="evolution-line-section">
+                        <div class="evolution-line-title">Evolution Line (Family ID: ${selectedStarterPokemon.familyId})</div>
+                        <div class="evolution-line">
+                            ${selectedPokemonEvolutionLine.map((pokemon, index) => `
+                                ${index > 0 ? '<div class="evolution-arrow">→</div>' : ''}
+                                <div class="evolution-stage">
+                                    <div class="evolution-stage-icon">
+                                        <img src="${pokemon.url}" alt="${pokemon.name}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png'">
+                                    </div>
+                                    <div class="evolution-stage-name">${pokemon.name}</div>
+                                    <div class="evolution-stage-points">${pokemon.min_points_required} pts</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+           
+            formContent.innerHTML = `
+                <div class="selected-pokemon-preview">
+                    <div class="selected-pokemon-icon">
+                        <img src="${selectedStarterPokemon.url}" alt="${selectedStarterPokemon.name}" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png'">
+                    </div>
+                    <div class="selected-pokemon-name">${selectedStarterPokemon.name}</div>
+                    <div class="selected-pokemon-id">#${selectedStarterPokemon.id}</div>
+                </div>
+               
+                ${evolutionLineHTML}
+               
+                <div style="background: #fff3cd; border: 2px solid #ffc107; padding: 10px; margin-top: 20px;">
+                    <p style="font-size: 9px; color: #856404; margin: 0;">
+                        <strong>Note:</strong> This Pokémon will be set as a Starter (rarity: starter) with Family ID: ${selectedStarterPokemon.familyId}
+                    </p>
+                </div>
+            `;
+           
+            formActions.style.display = 'flex';
+        }
+
+        function closeConfigureForm() {
+            document.getElementById('configureFormModal').classList.remove('active');
+            document.getElementById('configureFormContent').innerHTML = '';
+            document.getElementById('configureFormActions').style.display = 'none';
+            selectedPokemonEvolutionLine = [];
+        }
+
+        async function addPokemonAsStarter() {
+            if (!selectedStarterPokemon) {
+                showError('No Pokémon selected!');
+                return;
+            }
+        
+            try {
+                // Instead of adding a new Pokémon, update the existing one to starter rarity
+                const response = await fetch(`/admin/api/pokemon/update/${selectedStarterPokemon.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        rarity: 'starter'
+                    })
+                });
+            
+                const data = await response.json();
+            
+                if (data.success) {
+                    await loadCurrentPokemon();
+                    closeConfigureForm();
+                    showSuccess(`${selectedStarterPokemon.name} has been added as a starter Pokémon!`);
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error adding Pokémon:', error);
+                showError('Error updating Pokémon to starter');
+            }
+        }
+
+        function removeStarterPokemon(pokemonId, pokemonName) {
+            document.getElementById('removePokemonName').textContent = pokemonName;
+            document.getElementById('removePokemonId').value = pokemonId;
+            document.getElementById('removeStarterModal').classList.add('active');
+        }
+
+        async function confirmRemoveStarter(event) {
+            event.preventDefault();
+           
+            const form = document.getElementById('removeForm');
+            const formData = new FormData(form);
+            const pokemonId = formData.get('pokemon_id');
+           
+            if (!pokemonId) {
+                showError('No Pokémon ID provided');
+                return;
+            }
+           
+            try {
+                const response = await fetch(`/admin/api/pokemon/update/${pokemonId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        rarity: 'common'
+                    })
+                });
+               
+                const data = await response.json();
+               
+                if (data.success) {
+                    await loadCurrentPokemon();
+                    closeModal('removeStarterModal');
+                    showSuccess('Pokémon has been reverted to common rarity!');
+                } else {
+                    showError('Error: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error removing starter Pokémon:', error);
+                showError('Error removing starter Pokémon');
+            }
+        }
+
+        function goToDashboard() {
+            window.location.href = "{{ url_for('admin_dashboard') }}";
+        }
+
+        function showLogoutConfirm() {
+            document.getElementById('logoutModal').classList.add('active');
+        }
+
+        function performLogout() {
+            window.location.href = "{{ url_for('logout') }}";
+        }
+
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function showSuccess(message) {
+            alert('✅ ' + message);
+        }
+
+        function showError(message) {
+            alert('❌ ' + message);
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal') ||
+                event.target.classList.contains('pokemon-selector-modal') ||
+                event.target.classList.contains('configure-form-modal')) {
+                event.target.classList.remove('active');
+            }
+        }
+    </script>
+{%endblock%}

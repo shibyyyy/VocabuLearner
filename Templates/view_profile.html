@@ -1,0 +1,884 @@
+{% extends 'base.html' %}
+
+{% block title %}<title>{{ user.name }}'s Profile - VocabuLearner</title>{% endblock %}
+
+{% block content %}
+    {% block logo_link %}
+        <a href="{{ url_for('dashboard') }}" class="logo-link">
+            <div class="logo-icon">
+                <div class="pokeball-mini"></div>
+                <div class="pokeball-mini"></div>
+                <div class="pokeball-mini"></div>
+            </div>
+            VocabuLearner
+        </a>
+    {% endblock %}
+    
+    {% block header %}
+        <div class="header-actions">
+            {% if is_own_profile %}
+                <a href="{{ url_for('profile') }}" class="view-own-profile-btn">My Profile</a>
+            {% endif %}
+            <a href="{{ url_for('leaderboard') }}" class="back-to-leaderboard-btn">← Back to Leaderboard</a>
+        </div>
+    {% endblock %}
+   
+    <div class="profile-container">
+        <!-- Profile Header -->
+        <div class="profile-header-section">
+            <div class="profile-avatar-container">
+                <div class="profile-avatar" id="profileAvatar">
+                    {% if user.profile_picture %}
+                        <img src="{{ user.profile_picture }}" alt="Profile Avatar" class="avatar-img">
+                    {% else %}
+                        <div class="avatar-icon">👤</div>
+                    {% endif %}
+                </div>
+            </div>
+           
+            <h1 class="profile-title" id="profileName">{{ user.name }}</h1>
+            <p class="profile-subtitle">Vocabulary Trainer since <span id="joinDate">{{ user.date_created.strftime('%B %Y') }}</span></p>
+           
+            <div class="profile-level-badge" id="levelBadge">
+                {{ user.total_points }} XP • Streak: {{ user.current_streak }} days
+            </div>
+        </div>
+
+        <!-- Quick Stats - UPDATED WITHOUT PROGRESS BARS -->
+        <div class="profile-stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📚</div>
+                <div class="stat-value">{{ words_learned }}</div>
+                <div class="stat-label">WORDS STORED</div>
+                <div class="stat-subtitle">Total vocabulary</div>
+            </div>
+           
+            <div class="stat-card">
+                <div class="stat-icon">🔥</div>
+                <div class="stat-value">{{ user.current_streak }}</div>
+                <div class="stat-label">STREAK</div>
+                <div class="stat-subtitle">Days active</div>
+            </div>
+           
+            <div class="stat-card">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-value">{{ user.total_points }}</div>
+                <div class="stat-label">POINTS</div>
+                <div class="stat-subtitle">Pokémon EXP</div>
+            </div>
+
+            <!-- ADDED: Pokémon Collection Stat Card (View Only) -->
+            <div class="stat-card clickable" onclick="showPokemonCollection()">
+                <div class="stat-icon">📖</div>
+                <div class="stat-value" id="pokemonCollected">{{ collected_pokemon_count }}</div>
+                <div class="stat-label">POKÉMON</div>
+                <div class="stat-subtitle">View collection</div>
+            </div>
+        </div>
+
+        <!-- Profile Sections -->
+        <div class="profile-sections">
+            <!-- Personal Information -->
+            <div class="profile-section">
+                <h2 data-icon="👤">PERSONAL INFORMATION</h2>
+               
+                <div class="info-item">
+                    <div class="info-label">USERNAME</div>
+                    <div class="info-value" id="username">{{ user.name }}</div>
+                </div>
+               
+                <div class="info-item">
+                    <div class="info-label">ACCOUNT CREATED</div>
+                    <div class="info-value" id="accountCreated">{{ user.date_created.strftime('%B %d, %Y') }}</div>
+                </div>
+               
+                <div class="info-item">
+                    <div class="info-label">LAST LOGIN</div>
+                    <div class="info-value" id="lastLogin">
+                        {% if user.last_login %}
+                            {{ user.last_login.strftime('%B %d, %Y %I:%M %p') }}
+                        {% else %}
+                            Never
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Learning Partner -->
+            <div class="profile-section">
+                <h2 data-icon="⚡">LEARNING PARTNER</h2>
+               
+                <div class="partner-section">
+                    <div class="partner-card">
+                        {% if pokemon %}
+                            <img src="{{ pokemon.url if pokemon.url else 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png' }}"
+                                alt="{{ pokemon.name }}"
+                                class="partner-image"
+                                id="partnerImage">
+                            <div class="partner-name" id="partnerName">
+                                {{ pokemon_display_name }}
+                            </div>
+                            <div class="partner-type" id="partnerType">{{ pokemon.name.upper() if pokemon.name else 'POKEMON' }}</div>
+                        {% else %}
+                            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png"
+                                alt="Pikachu"
+                                class="partner-image"
+                                id="partnerImage">
+                            <div class="partner-name" id="partnerName">No Pokémon Yet</div>
+                            <div class="partner-type" id="partnerType">EARN POINTS TO UNLOCK</div>
+                        {% endif %}
+                    </div>
+                </div>
+               
+                <div style="margin-top: 20px; font-size: 9px; color: #fff; text-align: center; opacity: 0.8;">
+                    Pokémon partner on vocabulary journey!
+                </div>
+            </div>
+
+            <!-- Achievements -->
+            <div class="profile-section" style="grid-column: span 2;">
+                <h2 data-icon="🏆">ACHIEVEMENTS</h2>
+            
+                <!-- Pokémon Achievements Grid -->
+                <div class="pokemon-achievements-grid">
+                    {% for achievement in all_achievements %}
+                        {% set user_achievement = user_achievements_dict.get(achievement.achievement_id) %}
+                        {% set is_unlocked = user_achievement and user_achievement.date_earned %}
+                    
+                        {% set pokemon_data = achievement_pokemon.get(achievement.achievement_id) %}
+                    
+                        <div class="pokemon-badge {% if not is_unlocked %}locked{% endif %}">
+                            <div class="pokemon-icon">
+                                {% if pokemon_data and pokemon_data.url %}
+                                    <img src="{{ pokemon_data.url }}" alt="{{ pokemon_data.name }}">
+                                {% else %}
+                                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png" alt="Unknown">
+                                {% endif %}
+                            </div>
+                            <div class="pokemon-name">{{ achievement.name }}</div>
+                            <div class="pokemon-desc">{{ achievement.description }}</div>
+                            <div class="pokemon-progress">
+                                {% if is_unlocked %}
+                                    Unlocked!
+                                {% else %}
+                                    Locked
+                                {% endif %}
+                            </div>
+                            <!-- Optionally show unlock date -->
+                            {% if is_unlocked and user_achievement.date_earned %}
+                                <div class="unlock-date">
+                                    Earned: {{ user_achievement.date_earned.strftime('%b %d, %Y') }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADDED: Pokémon Collection Modal (View Only) -->
+    <div id="pokemonCollectionModal" class="modal">
+        <div class="modal-content" style="max-width: 90%; max-height: 90%;">
+            <div class="modal-header">
+                <h2 style="margin: 0; display: flex; align-items: center; gap: 10px;">
+                    <span>🔮</span>
+                    <span>{{ user.name }}'s POKÉMON COLLECTION</span>
+                </h2>
+                <span class="modal-close" onclick="closePokemonCollection()">&times;</span>
+            </div>
+            
+            <div class="modal-body">
+                <div class="collection-stats">
+                    <div class="collection-stat">
+                        <span class="stat-number" id="modalPokemonCount">{{ collected_pokemon_count }}</span>
+                        <span class="stat-label">Total Collected</span>
+                    </div>
+                    <div class="collection-stat">
+                        <span class="stat-number" id="modalUniqueCount">{{ unique_pokemon_count }}</span>
+                        <span class="stat-label">Unique Species</span>
+                    </div>
+                    <div class="collection-stat">
+                        <span class="stat-number">{{ pokemon_display_name if pokemon else "None" }}</span>
+                        <span class="stat-label">Current Partner</span>
+                    </div>
+                </div>
+                
+                <div class="collection-filters">
+                    <button class="filter-btn active" onclick="filterCollection('all')">All Pokémon</button>
+                    <button class="filter-btn" onclick="filterCollection('common')">Common</button>
+                    <button class="filter-btn" onclick="filterCollection('rare')">Rare</button>
+                    <button class="filter-btn" onclick="filterCollection('legendary')">Legendary</button>
+                    <!-- ADDED: Starter and Achievement filters -->
+                    <button class="filter-btn" onclick="filterCollection('starter')">Starter</button>
+                    <button class="filter-btn" onclick="filterCollection('achievement')">Achievement</button>
+                </div>
+                
+                <div id="pokemonCollectionGrid" class="pokemon-collection-grid">
+                    <!-- Pokemon will be loaded here -->
+                </div>
+                
+                <div class="collection-empty" id="emptyCollectionMessage" style="display: none;">
+                    <div class="empty-icon">🔍</div>
+                    <h3>No Pokémon Found</h3>
+                    <p>{{ user.name }} hasn't collected any Pokémon yet!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>© 2025 VocabuLearner • Viewing {{ user.name }}'s Profile</p>
+    </footer>
+
+    <style>
+        /* Existing styles from view profile... */
+        
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            padding: 10px;
+        }
+        
+        .view-own-profile-btn,
+        .back-to-leaderboard-btn {
+            background: #4169e1;
+            color: white;
+            border: 3px solid #000;
+            padding: 8px 15px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 4px 4px 0 #000;
+        }
+        
+        .view-own-profile-btn:hover,
+        .back-to-leaderboard-btn:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #000;
+        }
+        
+        .profile-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        
+        .leaderboard-item {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .leaderboard-item:hover {
+            transform: translateX(5px);
+        }
+        
+        /* Remove edit buttons from view profile */
+        .info-item button.edit-btn,
+        .change-avatar-btn,
+        .change-name-btn,
+        .profile-actions {
+            display: none !important;
+        }
+        
+        
+        /* Profile info items styling - UPDATED WITH LARGER FONTS */
+        .info-item {
+            margin: 15px 0;
+            padding: 20px;
+            border: 2px solid #000;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .info-item:hover {
+            border-color: #ffd700;
+            transform: translateX(5px);
+            box-shadow: 0 6px 15px rgba(255, 215, 0, 0.2);
+        }
+        
+        .info-label {
+            font-size: 14px; /* Increased from 10px */
+            color: #ffd700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px; /* Increased from 1px */
+            margin-bottom: 8px; /* Increased from 5px */
+            font-family: 'Press Start 2P', monospace;
+            text-shadow: 2px 2px 0 #000; /* Stronger shadow */
+            font-weight: 700;
+        }
+        
+        .info-value {
+            font-size: 20px; /* Increased from 16px */
+            font-weight: 700; /* Increased from 600 */
+            color: #fff;
+            font-family: 'Press Start 2P', monospace;
+            text-shadow: 
+                2px 2px 0 #000,
+                4px 4px 0 rgba(0, 0, 0, 0.2); /* Double shadow */
+            word-break: break-word;
+            line-height: 1.4;
+            padding: 5px 0;
+        }
+        
+        /* Make last login date more readable */
+        .info-value#lastLogin {
+            color: #ffed4e; /* Brighter yellow for dates */
+            font-size: 18px; /* Slightly smaller for dates */
+        }
+        
+        /* Style the username specifically */
+        .info-value#username {
+            color: #ffd700;
+            font-size: 22px; /* Even larger for username */
+            font-weight: 800;
+            text-transform: capitalize;
+        }
+        
+        /* Style dates specifically */
+        .info-value#accountCreated,
+        .info-value#lastLogin {
+            color: #ffed4e;
+            font-size: 18px;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Profile header styling -->
+        .profile-header-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .profile-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #ffd700;
+            text-shadow: 
+                2px 2px 0 #000,
+                4px 4px 0 rgba(0, 0, 0, 0.3);
+            margin: 15px 0 5px;
+            font-family: 'Press Start 2P', monospace;
+            letter-spacing: 1px;
+        }
+        
+        .profile-subtitle {
+            font-size: 12px;
+            color: #fff;
+            opacity: 0.8;
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 0 #000;
+            font-family: 'Press Start 2P', monospace;
+        }
+        
+        .profile-level-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, rgba(255, 68, 68, 0.2), rgba(255, 215, 0, 0.2));
+            border: 2px solid #ffd700;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #fff;
+            font-weight: 600;
+            text-shadow: 1px 1px 0 #000;
+            font-family: 'Press Start 2P', monospace;
+            box-shadow: 0 4px 10px rgba(255, 215, 0, 0.2);
+        }
+        
+        /* ADDED: Pokémon Collection Modal Styles (View Only) -->
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            overflow: auto;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: #1a1a2e;
+            margin: 5% auto;
+            padding: 0;
+            border: 4px solid #4169e1; /* Different color for view mode */
+            border-radius: 12px;
+            width: 90%;
+            max-width: 1200px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            font-family: 'Press Start 2P', monospace;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #4169e1, #8a2be2);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid #4169e1; /* Different color for view mode */
+        }
+
+        .modal-close {
+            color: #fff;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0 10px;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            color: #ffd700;
+            transform: scale(1.2);
+        }
+
+        .modal-body {
+            padding: 20px;
+            background: linear-gradient(135deg, #0f3460, #16213e);
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .collection-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .collection-stat {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #4169e1;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .collection-stat:hover {
+            transform: translateY(-5px);
+            border-color: #ffd700;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 24px;
+            color: #ffd700;
+            text-shadow: 2px 2px 0 #000;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: #fff;
+            opacity: 0.8;
+            text-transform: uppercase;
+        }
+
+        .collection-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            border: 2px solid #000;
+            background: #4169e1;
+            color: white;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+            box-shadow: 3px 3px 0 #000;
+        }
+
+        .filter-btn.active {
+            background: #ffd700;
+            color: #000;
+            border-color: #000;
+        }
+
+        .filter-btn:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0 #000;
+        }
+
+        .pokemon-collection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .pokemon-collection-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 3px solid #4169e1;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pokemon-collection-card:hover {
+            transform: scale(1.05);
+            border-color: #4169e1;
+            box-shadow: 0 10px 20px rgba(65, 105, 225, 0.2);
+        }
+
+        .pokemon-collection-card.current-partner {
+            border-color: #ffd700;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(139, 69, 19, 0.2));
+            position: relative;
+        }
+
+        .pokemon-collection-card.current-partner::before {
+            content: '⭐ CURRENT PARTNER';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #ffd700;
+            color: #000;
+            font-size: 6px;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+            z-index: 1;
+        }
+
+        .pokemon-collection-img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 10px;
+            filter: drop-shadow(2px 2px 0 #000);
+        }
+
+        .pokemon-collection-name {
+            font-size: 12px;
+            color: #fff;
+            margin-bottom: 5px;
+            text-transform: capitalize;
+            font-weight: bold;
+        }
+
+        .pokemon-collection-rarity {
+            font-size: 8px;
+            color: #aaa;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .pokemon-collection-date {
+            font-size: 8px;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        .rarity-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 3px 6px;
+            font-size: 6px;
+            border-radius: 3px;
+            font-weight: bold;
+            z-index: 1;
+        }
+
+        .rarity-badge.common {
+            background: #808080;
+            color: white;
+        }
+
+        .rarity-badge.rare {
+            background: #4169e1;
+            color: white;
+        }
+
+        .rarity-badge.legendary {
+            background: #ffd700;
+            color: #000;
+        }
+
+        .collection-empty {
+            text-align: center;
+            padding: 40px 20px;
+            color: #fff;
+        }
+
+        .empty-icon {
+            font-size: 50px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .profile-stats-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .stat-card {
+                padding: 20px 15px;
+            }
+            
+            .stat-value {
+                font-size: 36px;
+            }
+            
+            .profile-title {
+                font-size: 24px;
+            }
+            
+            .info-label {
+                font-size: 12px;
+            }
+            
+            .info-value {
+                font-size: 16px;
+            }
+            
+            .info-value#username {
+                font-size: 18px;
+            }
+            
+            .info-value#accountCreated,
+            .info-value#lastLogin {
+                font-size: 14px;
+            }
+            
+            .info-item {
+                padding: 15px;
+            }
+            
+            .modal-content {
+                margin: 2% auto;
+                width: 95%;
+            }
+            
+            .collection-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .pokemon-collection-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .pokemon-collection-card {
+                padding: 10px;
+            }
+            
+            .pokemon-collection-img {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .pokemon-collection-name {
+                font-size: 10px;
+            }
+            
+            .filter-btn {
+                padding: 6px 12px;
+                font-size: 8px;
+            }
+        }
+    </style>
+
+        <script>
+        let allPokemonData = [];
+        const viewedUserId = {{ user.user_id }};
+        const viewedUserPartnerId = {{ user.pokemon_id if user.pokemon_id else 0 }};
+
+        function showPokemonCollection() {
+            const modal = document.getElementById('pokemonCollectionModal');
+            modal.style.display = 'block';
+            loadPokemonCollection();
+        }
+
+        function closePokemonCollection() {
+            const modal = document.getElementById('pokemonCollectionModal');
+            modal.style.display = 'none';
+        }
+
+        function loadPokemonCollection() {
+            const collectionGrid = document.getElementById('pokemonCollectionGrid');
+            const emptyMessage = document.getElementById('emptyCollectionMessage');
+            
+            collectionGrid.innerHTML = '<div style="grid-column: span 4; text-align: center; padding: 40px; color: #ffd700;">Loading Pokémon collection... ⚡</div>';
+            
+            fetch(`/api/get_user_pokemon?user_id=${viewedUserId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        allPokemonData = data.pokemon || [];
+                        renderPokemonCollection('all');
+                        
+                        document.getElementById('modalPokemonCount').textContent = data.total_collected || allPokemonData.length;
+                        document.getElementById('modalUniqueCount').textContent = data.unique_species || new Set(allPokemonData.map(p => p.pokemon_id)).size;
+                        
+                        if (allPokemonData.length === 0) {
+                            collectionGrid.style.display = 'none';
+                            emptyMessage.style.display = 'block';
+                        } else {
+                            collectionGrid.style.display = 'grid';
+                            emptyMessage.style.display = 'none';
+                        }
+                    } else {
+                        showNotification('Error: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    showNotification('Network error: ' + error.message);
+                });
+        }
+
+        function renderPokemonCollection(filter) {
+            const collectionGrid = document.getElementById('pokemonCollectionGrid');
+            
+            let filteredPokemon = allPokemonData;
+            if (filter !== 'all') {
+                filteredPokemon = allPokemonData.filter(pokemon => {
+                    if (filter === 'common') return pokemon.rarity === 'common';
+                    if (filter === 'rare') return pokemon.rarity === 'rare';
+                    if (filter === 'legendary') return pokemon.rarity === 'legendary';
+                    if (filter === 'starter') return pokemon.rarity === 'starter' || pokemon.min_points_required <= 100;
+                    if (filter === 'achievement') return pokemon.rarity === 'achievement';
+                    return true;
+                });
+            }
+            
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.toLowerCase().includes(filter)) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            if (filteredPokemon.length === 0) {
+                collectionGrid.innerHTML = '<div style="grid-column: span 4; text-align: center; padding: 40px; color: #ffd700;">No Pokémon found for this filter 🔍</div>';
+                return;
+            }
+            
+            collectionGrid.innerHTML = filteredPokemon.map(pokemon => {
+                const isPartner = pokemon.pokemon_id === viewedUserPartnerId;
+                
+                let sourceBadge = '';
+                if (pokemon.rarity === 'starter' || pokemon.min_points_required <= 100) {
+                    sourceBadge = '<div class="rarity-badge starter">STARTER</div>';
+                } 
+                else if (pokemon.rarity === 'achievement') {
+                    sourceBadge = '<div class="rarity-badge achievement">ACHIEVEMENT</div>';
+                }
+                else if (pokemon.rarity) {
+                    sourceBadge = `<div class="rarity-badge ${pokemon.rarity}">${pokemon.rarity.toUpperCase()}</div>`;
+                }
+                
+                const displayName = pokemon.custom_name || pokemon.name || 'Unknown';
+                
+                return `
+                    <div class="pokemon-collection-card ${isPartner ? 'current-partner' : ''}">
+                        ${sourceBadge}
+                        <img src="${pokemon.url || 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png'}" 
+                            alt="${displayName}" 
+                            class="pokemon-collection-img"
+                            onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/0.png'">
+                        <div class="pokemon-collection-name">${displayName}</div>
+                        <div class="pokemon-collection-rarity">ID: ${pokemon.pokemon_id}</div>
+                        <div class="pokemon-collection-date">${pokemon.date_obtained ? new Date(pokemon.date_obtained).toLocaleDateString() : 'Unknown date'}</div>
+                        ${isPartner ? '<div style="font-size: 8px; color: #ffd700; margin-top: 5px;">⭐ CURRENT PARTNER</div>' : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterCollection(filterType) {
+            renderPokemonCollection(filterType);
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.textContent = message;
+           
+            notification.style.position = 'fixed';
+            notification.style.top = '100px';
+            notification.style.right = '20px';
+            notification.style.background = 'rgba(0, 0, 0, 0.9)';
+            notification.style.color = 'white';
+            notification.style.padding = '15px 20px';
+            notification.style.border = '3px solid #4169e1';
+            notification.style.fontFamily = "'Press Start 2P', monospace";
+            notification.style.fontSize = '10px';
+            notification.style.zIndex = '10000';
+            notification.style.boxShadow = '6px 6px 0 #000';
+            notification.style.animation = 'slideIn 0.3s ease';
+            notification.style.maxWidth = '300px';
+            notification.style.textAlign = 'center';
+           
+            document.body.appendChild(notification);
+           
+            if (!document.querySelector('#notification-styles')) {
+                const style = document.createElement('style');
+                style.id = 'notification-styles';
+                style.textContent = `
+                    @keyframes slideIn {
+                        from { transform: translateX(100%); opacity: 0; }
+                        to { transform: translateX(0); opacity: 1; }
+                    }
+                    @keyframes slideOut {
+                        from { transform: translateX(0); opacity: 1; }
+                        to { transform: translateX(100%); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+           
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('pokemonCollectionModal');
+            if (event.target === modal) {
+                closePokemonCollection();
+            }
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closePokemonCollection();
+            }
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+
+{% block title %}
+    <title>VocabuLearner - Word Bank</title>
+{% endblock %}
+
+
+{% block content %}
+    {% block logo_link %}
+        <a href="{{ url_for('dashboard') }}" class="logo-link">
+            <div class="logo-icon">
+                <div class="pokeball-mini"></div>
+                <div class="pokeball-mini"></div>
+                <div class="pokeball-mini"></div>
+            </div>
+            VocabuLearner
+        </a>
+    {% endblock %}
+    {% block header %}{% endblock %}
+
+
+    <div class="dashboard-container">
+        <!-- Back Button -->
+        <div class="back-button-container">
+            <a href="{{ url_for('dashboard') }}" class="back-button">
+                ← Back to Dashboard
+            </a>
+        </div>
+
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <h1>My WordBank</h1>
+            <div class="welcome-stats">
+                <div class="stat-item">
+                    <span class="label">Total Words</span>
+                    <span class="value">{{ words|length }} Words</span>
+                </div>
+                <!-- You can compute mastered/review stats in Python and pass them in -->
+            </div>
+        </div>
+
+
+        <!-- WordBank Header -->
+        <div class="wordbank-header">
+            <h2 class="wordbank-title">Your Vocabulary Collection</h2>
+            <div class="search-filter-container">
+                <input type="text" class="search-box" placeholder="Search words..." id="searchInput">
+            </div>
+        </div>
+
+
+        <!-- Words Grid -->
+        <div class="words-grid" id="wordsGrid">
+            {% for user_word, vocab, ph_date in words %}
+            <div class="word-card2"
+                onclick="openWordModal('{{ vocab.word }}',
+                                '{{ vocab.definition }}',
+                                '{{ vocab.example_sentence }}',
+                                '{{ ph_date }}',
+                                '{{ vocab.word_id }}')">
+
+
+            <div class="word-header">
+                            <h3 class="word-text">{{ vocab.word }}</h3>
+                            <span class="word-type">{{ vocab.category or "N/A" }}</span>
+                        </div>
+                        <p class="word-definition">{{ vocab.definition }}</p>
+                        <div class="word-example">"{{ vocab.example_sentence }}"</div>
+                        <div class="word-stats">
+                            <span>🟡 Learned</span>
+                            <!-- Use ph_date instead of user_word.date_learned -->
+                            <span>📅 {{ ph_date }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+
+        <!-- WordBank Actions -->
+        <div class="wordbank-actions">
+            <button class="btn-primary1" onclick="window.location.href='/add_word'">ADD NEW WORD</button>
+            <button class="btn-secondary1" onclick="window.location.href='/review'">PRACTICE WORDS</button>
+        </div>
+    </div>
+
+
+    <!-- Word Detail Modal -->
+    <div class="modal2" id="wordModal">
+        <div class="modal2-content">
+            <div class="modal2-header">
+                <h2 class="modal2-title" id="modalWord"></h2>
+                <span class="modal2-type" id="modalType"></span>
+            </div>
+            <p class="modal2-definition" id="modalDefinition"></p>
+            <div class="modal2-example" id="modalExample"></div>
+            <div class="modal2-stats">
+                <div class="modal2-stat">
+                    <span class="modal2-stat-label">Added On</span>
+                    <span class="modal2-stat-value" id="modalDate"></span>
+                </div>
+            </div>
+            <div class="modal2-actions">
+                <button class="btn-close" onclick="closeWordModal()">CLOSE</button>
+            </div>
+        </div>
+    </div>
+
+
+    <footer class="footer">
+        <p>© 2025 VocabuLearner</p>
+    </footer>
+
+
+    <style>
+        /* Back Button Styles */
+        .back-button-container {
+            margin-bottom: 20px;
+        }
+        
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #f0f0f0;
+            color: #333;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid #ddd;
+        }
+        
+        .back-button:hover {
+            background-color: #e0e0e0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .back-button:active {
+            transform: translateY(0);
+        }
+    </style>
+
+    <script>
+        let currentWordId = null;
+
+
+// Open word detail modal
+function openWordModal(word, definition, example, date, id) {
+    document.getElementById('modalWord').textContent = word;
+    document.getElementById('modalDefinition').textContent = definition;
+    document.getElementById('modalExample').textContent = `"${example}"`;
+    document.getElementById('modalDate').textContent = date;
+    document.getElementById('wordModal').classList.add('active');
+
+
+    currentWordId = id; // store the word id
+}
+
+
+// Close word detail modal
+function closeWordModal() {
+    document.getElementById('wordModal').classList.remove('active');
+    currentWordId = null;
+}
+
+
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', filterWords);
+
+        function filterWords() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const cards = document.querySelectorAll('.word-card2');
+
+            cards.forEach(card => {
+                const word = card.querySelector('.word-text').textContent.toLowerCase();
+                const definition = card.querySelector('.word-definition').textContent.toLowerCase();
+                const matchesSearch = word.includes(searchTerm) || definition.includes(searchTerm);
+
+                if (matchesSearch) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
+{% endblock %}

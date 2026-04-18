@@ -1,0 +1,303 @@
+{%extends 'base.html'%}
+
+
+{%block title%}
+    <title>VocabuLearner - Review</title>
+{%endblock%}
+
+
+{%block content%}
+    {%block logo_link %}
+        <a href="{{ url_for('dashboard') }}" class="logo-link">
+            <div class="logo-icon">
+                <div class="pokeball-mini"></div>
+                <div class="pokeball-mini"></div>
+                <div class="pokeball-mini"></div>
+            </div>
+            VocabuLearner
+        </a>
+    {% endblock %}
+   
+    <div class="review-container">
+        <!-- Back Button -->
+        <div class="back-button-container">
+            <a href="{{ url_for('dashboard') }}" class="back-button">
+                ← Back to Dashboard
+            </a>
+        </div>
+
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <h1>Review Vocabulary</h1>
+        </div>
+
+
+        <!-- Activity Selection -->
+        <div class="activity-selection">
+            <div class="activity-card" onclick="openFlashcardModal()">
+                <div class="icon">📇</div>
+                <h3>Flashcards</h3>
+                <p class="description">Flip cards to reveal definitions and examples</p>
+            </div>
+            <div class="activity-card" onclick="openMCQModal()">
+                <div class="icon">❓</div>
+                <h3>Multiple Choice</h3>
+                <p class="description">Test your knowledge with multiple choice questions</p>
+            </div>
+            <div class="activity-card" onclick="openMatchingModal()">
+                <div class="icon">🔀</div>
+                <h3>Matching Game</h3>
+                <p class="description">Match words with their correct definitions</p>
+            </div>
+        </div>
+
+
+        <!-- Simple Preview of Words (Optional) -->
+        {% if words_count > 0 %}
+        <div class="words-preview">
+            <h3>Sample Words for Review</h3>
+            <div class="preview-words">
+                {% for word in words[:3] %}
+                <div class="preview-word">
+                    <div class="word-name">{{ word.word }}</div>
+                    <div class="word-meaning">{{ word.definition[:50] }}{% if word.definition|length > 50 %}...{% endif %}</div>
+                </div>
+                {% endfor %}
+                {% if words_count > 3 %}
+                <div class="more-words">... and {{ words_count - 3 }} more words</div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+
+    <!-- Flashcard Modal -->
+    <div class="modal" id="flashcardModal">
+        <div class="modal-content">
+            <h2>📇 Flashcards</h2>
+            <p>Flip cards to reveal definitions. Click "I Know" or "Don't Know" to track your progress.</p>
+            <div class="modal-buttons">
+                <button onclick="closeModal('flashcardModal')" class="btn-back">Back</button>
+                <button onclick="startFlashcards()" class="btn-start">Start Flashcards</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Multiple Choice Modal -->
+    <div class="modal" id="mcqModal">
+        <div class="modal-content">
+            <h2>❓ Multiple Choice</h2>
+            <p>Test your knowledge with multiple choice questions. Choose the correct definition from 4 options.</p>
+            <div class="modal-buttons">
+                <button onclick="closeModal('mcqModal')" class="btn-back">Back</button>
+                <button onclick="startMCQ()" class="btn-start">Start Quiz</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Matching Game Modal -->
+    <div class="modal" id="matchingModal">
+        <div class="modal-content">
+            <h2>🔀 Matching Game</h2>
+            <p>Match words with their definitions. Find all pairs to complete the game.</p>
+            <div class="modal-buttons">
+                <button onclick="closeModal('matchingModal')" class="btn-back">Back</button>
+                <button onclick="startMatching()" class="btn-start">Start Game</button>
+            </div>
+        </div>
+    </div>
+
+
+    <footer class="footer">
+        <p>© 2025 VocabuLearner</p>
+    </footer>
+
+
+    <style>
+        /* Back Button Styles - Same as word bank page */
+        .back-button-container {
+            margin-bottom: 20px;
+        }
+        
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #f0f0f0;
+            color: #333;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid #ddd;
+        }
+        
+        .back-button:hover {
+            background-color: #e0e0e0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .back-button:active {
+            transform: translateY(0);
+        }
+
+        /* Modal Styles - Simple addition */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            margin: 15% auto;
+            padding: 25px;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        
+        .modal-content h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        
+        .modal-content p {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 25px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .btn-back {
+            padding: 10px 20px;
+            background: #f5f5f5;
+            border: none;
+            border-radius: 5px;
+            color: #333;
+            cursor: pointer;
+        }
+        
+        .btn-start {
+            padding: 10px 20px;
+            background: #4CAF50;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+        }
+        
+        .btn-start:hover {
+            background: #45a049;
+        }
+        
+        .btn-back:hover {
+            background: #e0e0e0;
+        }
+        
+        /* Existing styles kept the same */
+        .words-preview {
+            margin-top: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .words-preview h3 {
+            margin-bottom: 15px;
+            color: #333;
+            text-align: center;
+        }
+        
+        .preview-words {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .preview-word {
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 5px;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .word-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .word-meaning {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .more-words {
+            text-align: center;
+            color: #888;
+            font-style: italic;
+            margin-top: 10px;
+        }
+    </style>
+
+    <script>
+        // Open modals
+        function openFlashcardModal() {
+            document.getElementById('flashcardModal').style.display = 'block';
+        }
+        
+        function openMCQModal() {
+            document.getElementById('mcqModal').style.display = 'block';
+        }
+        
+        function openMatchingModal() {
+            document.getElementById('matchingModal').style.display = 'block';
+        }
+        
+        // Close modals
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        // Start activities
+        function startFlashcards() {
+            window.location.href = '/flashcard';
+        }
+        
+        function startMCQ() {
+            window.location.href = '/multichoi';
+        }
+        
+        function startMatching() {
+            window.location.href = '/matchingtype';
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+    </script>
+{%endblock%}

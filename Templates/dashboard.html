@@ -1,0 +1,688 @@
+{% extends 'base.html' %}
+
+
+{% block title %}<title>VocabuLearner</title>{% endblock %}
+
+
+{% block content %}
+    {% block logo_link %}
+        <a href="{{ url_for('dashboard') }}" class="logo-link">
+            <div class="logo-icon">
+                <div class="pokeball-mini"></div>
+                <div class="pokeball-mini"></div>
+                <div class="pokeball-mini"></div>
+            </div>
+            VocabuLearner
+        </a>
+    {% endblock %}
+    {% block header %}
+    <div class="header-actions">
+        <button class="logout-btn" onclick="confirmLogout()">Logout</button>
+    </div>
+    {% endblock %}
+
+
+    <div class="right-buttons">
+        <!-- Profile Button -->
+        <div class="profile-btn" onclick="window.location.href='/profile'">
+            <div class="profile-icon">👤</div>
+        </div>
+        <!-- Notification Button -->
+        <div class="notification-btn" onclick="toggleNotifications()">
+            <div class="notification-bell-icon">🔔</div>
+            <div class="notification-badge" id="notificationBadge">3</div>
+        </div>
+    </div>
+
+
+    <!-- Notification Container -->
+    <div class="notification-container">
+        <div class="notification-dropdown" id="notificationDropdown">
+            <div class="notification-header">
+                <h3>NOTIFICATIONS</h3>
+            </div>
+            <div class="notification-list" id="notificationList"></div>
+            <div class="notification-footer">
+                <button class="btn-clear-all" onclick="clearAllNotifications()">Clear All</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Hidden element to store Pokémon data -->
+    <div id="pokemonDataStorage" data-pokemons='{{ pokemons|tojson|safe }}' style="display: none;"></div>
+
+
+    <div class="dashboard-container">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <h1>Hello, Trainer {{ current_user.name }}!</h1>
+        </div>
+
+
+        <!-- Word of the Day Section -->
+        <div class="word-of-day-section">
+            <div class="word-of-day-header">
+                <h2 class="word-of-day-title">📚 WORD OF THE DAY</h2>
+                <div class="word-date" id="currentDate"></div>
+            </div>
+            <table class="word-table">
+                <thead>
+                    <tr>
+                        <th>WORD</th>
+                        <th>TYPE</th>
+                        <th>MEANING</th>
+                        <th>EXAMPLE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="word-main">{{ word_data.word }}</span></td>
+                        <td><span class="word-type">{{ word_data.type }}</span></td>
+                        <td>{{ word_data.definition }}</td>
+                        <td><div class="word-example">"{{ word_data.example }}"</div></td>
+                    </tr>
+                </tbody>
+                </table>
+
+            <div class="word-actions">
+                <form action="{{ url_for('add_to_collection', word_id=word_data.word_id) }}" method="post" id="addWordOfDayForm">
+                    {% if word_data.user_has_word %}
+                        <button type="submit" class="btn btn-primary" disabled style="opacity: 0.6; cursor: not-allowed;">
+                            ✓ Already in Collection
+                        </button>
+                    {% else %}
+                        <button type="submit" class="btn btn-primary" onclick="showWordOfDayNotice(event)">➕ Save to Collection</button>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+
+
+        <!-- Navigation -->
+        <div class="nav-row">
+            <div class="nav-item" onclick="window.location.href='/review'"><div class="icon">📖</div><h3>Review Now</h3></div>
+            <div class="nav-item" onclick="window.location.href='/wordbank'"><div class="icon">📝</div><h3>My Words</h3></div>
+            <div class="nav-item" onclick="window.location.href='/add_word'"><div class="icon">➕</div><h3>Add New Word</h3></div>
+        </div>
+
+
+        <!-- Progress Section -->
+            <div class="progress-section">
+                <div class="progress-card">
+                    <h2>Your Progress</h2>
+                    <div class="progress-stat">
+                        <span class="label">Words Learned This Week</span>
+                        <span class="value">{{ weekly_total }}</span>
+                    </div>
+                    <div class="progress-stat">
+                        <span class="label">Current Streak</span>
+                        <span class="value">{{ streak }} Days</span>
+                    </div>
+                    <button class="btn-secondary" onclick="window.location.href='/progress'">VIEW DETAILED PROGRESS</button>
+                </div>
+
+                <div class="progress-card">
+                    <h2>All Time Ranking</h2>
+                    <div class="progress-stat">
+                        <span class="label">Current Rank</span>
+                        <span class="value">#{{ user_rank }}</span>
+                    </div>
+                    <div class="progress-stat">
+                        <span class="label">Total Points</span>
+                        <span class="value">{{ total_points }}</span>
+                    </div>
+                    <button class="btn-secondary" onclick="window.location.href='/leaderboard'">VIEW LEADERBOARD</button>
+                </div>
+            </div>
+
+
+    <!-- Starter Modal -->
+    {% if showStarterModal %}
+    <div class="modal active" id="welcomeModal">
+        <div class="modal-content">
+            <h2>Welcome to VocabuLearner!</h2>
+            <p>Start your vocabulary journey today! Explore the dashboard to add words, review your collection, and track your progress.</p>
+            <p>First, choose your Pokémon partner to accompany you on your learning adventure!</p>
+            <button class="btn-confirm" onclick="openPokemonModal()">Choose Your Pokémon Partner!</button>
+        </div>
+    </div>
+
+
+    <div class="pokemon-modal" id="pokemonModal">
+        <div class="pokemon-modal-content">
+            <h2>Choose Your Learning Partner!</h2>
+            <p>Select your Pokémon partner who will accompany you on your vocabulary journey.</p>
+            <div class="pokemon-grid" id="pokemonGrid"></div>
+            <form action="{{ url_for('choose_partner') }}" method="POST" style="margin-top: 30px;">
+                <input type="hidden" name="pokemon_id" id="selectedPokemonId">
+                <button type="submit" class="btn-confirm">
+                    Start Learning with <span id="selectedPartnerName">Your Pokemon</span>!
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+
+    <!-- Word of the Day Added Notice (will be shown via JavaScript) -->
+    <div class="word-of-day-notice" id="wordOfDayNotice" style="display: none;">
+        <div class="notice-content">
+            <span class="notice-icon">🎉</span>
+            <div class="notice-text">
+                <strong id="noticeMessage">Word of the Day added to your collection!</strong>
+                <p>You've earned +{{ word_data.points_value }} bonus points for adding the Word of the Day!</p>
+            </div>
+            <button class="notice-close" onclick="closeWordOfDayNotice()">&times;</button>
+        </div>
+    </div>
+
+    <!-- Flash-based notice (for when page reloads) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                {% if category == 'word_of_day' %}
+                    <div class="word-of-day-notice" id="flashWordOfDayNotice">
+                        <div class="notice-content">
+                            <span class="notice-icon">🎉</span>
+                            <div class="notice-text">
+                                <strong>{{ message }}</strong>
+                                <p>You've earned +{{ word_data.points_value }} bonus points for adding the Word of the Day!</p>
+                            </div>
+                            <button class="notice-close" onclick="closeFlashWordOfDayNotice()">&times;</button>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <footer class="footer">
+        <p>© 2025 VocabuLearner</p>
+    </footer>
+
+    <style>
+        /* Word of the Day Notice Styles */
+        .word-of-day-notice {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+            z-index: 1000;
+            animation: slideInRight 0.5s ease-out;
+            max-width: 350px;
+        }
+        
+        .notice-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .notice-icon {
+            font-size: 24px;
+        }
+        
+        .notice-text {
+            flex: 1;
+        }
+        
+        .notice-text strong {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        
+        .notice-text p {
+            font-size: 14px;
+            margin: 0;
+            opacity: 0.9;
+        }
+        
+        .notice-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            opacity: 0.7;
+            padding: 0;
+            line-height: 1;
+        }
+        
+        .notice-close:hover {
+            opacity: 1;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    </style>
+
+    <script>
+        // --- Global Variables ---
+        let notifications = [];
+        let notificationPollInterval = null;
+        let notificationCreatorInterval = null;
+        let isNotificationDropdownOpen = false;
+        
+        // Notice persistence key
+        const NOTICE_STORAGE_KEY = 'word_of_day_notice_shown';
+
+        // --- Word of the Day Notice Functions ---
+        function showWordOfDayNotice(event) {
+            // Prevent default form submission for a moment to show the notice
+            event.preventDefault();
+            
+            // Get the word from the table
+            const wordElement = document.querySelector('.word-main');
+            const word = wordElement ? wordElement.textContent : 'Word of the Day';
+            
+            // Show the notice
+            const notice = document.getElementById('wordOfDayNotice');
+            const noticeMessage = document.getElementById('noticeMessage');
+            
+            if (notice && noticeMessage) {
+                noticeMessage.textContent = `Word of the Day '${word}' added to your collection!`;
+                notice.style.display = 'block';
+                notice.style.animation = 'slideInRight 0.5s ease-out';
+                
+                // Save to localStorage so it persists after refresh
+                localStorage.setItem(NOTICE_STORAGE_KEY, 'true');
+                localStorage.setItem('word_of_day_message', `Word of the Day '${word}' added to your collection!`);
+            }
+            
+            // Now submit the form after a short delay
+            setTimeout(() => {
+                document.getElementById('addWordOfDayForm').submit();
+            }, 100);
+        }
+
+        function closeWordOfDayNotice() {
+            const notice = document.getElementById('wordOfDayNotice');
+            if (notice && notice.style.display !== 'none') {
+                notice.style.animation = 'slideOutRight 0.5s ease-out';
+                setTimeout(() => {
+                    notice.style.display = 'none';
+                    // Remove from localStorage when closed
+                    localStorage.removeItem(NOTICE_STORAGE_KEY);
+                    localStorage.removeItem('word_of_day_message');
+                }, 500);
+            }
+        }
+
+        function closeFlashWordOfDayNotice() {
+            const notice = document.getElementById('flashWordOfDayNotice');
+            if (notice) {
+                notice.style.animation = 'slideOutRight 0.5s ease-out';
+                setTimeout(() => {
+                    if (notice.parentElement) {
+                        notice.parentElement.removeChild(notice);
+                    }
+                }, 500);
+            }
+        }
+
+        // Check if notice should be shown on page load
+        function checkAndShowPersistentNotice() {
+            const noticeShown = localStorage.getItem(NOTICE_STORAGE_KEY);
+            if (noticeShown === 'true') {
+                const notice = document.getElementById('wordOfDayNotice');
+                const noticeMessage = document.getElementById('noticeMessage');
+                const savedMessage = localStorage.getItem('word_of_day_message');
+                
+                if (notice && noticeMessage) {
+                    noticeMessage.textContent = savedMessage || 'Word of the Day added to your collection!';
+                    notice.style.display = 'block';
+                    notice.style.animation = 'slideInRight 0.5s ease-out';
+                }
+            }
+        }
+
+        // --- Pokémon Selection Functions ---
+        document.addEventListener("DOMContentLoaded", function() {
+            // Check and show persistent notice on page load
+            checkAndShowPersistentNotice();
+            
+            // Initialize Pokémon selection
+            const pokemonData = JSON.parse(document.getElementById("pokemonDataStorage").dataset.pokemons);
+            const grid = document.getElementById("pokemonGrid");
+            const selectedIdInput = document.getElementById("selectedPokemonId");
+            const selectedNameSpan = document.getElementById("selectedPartnerName");
+
+            if (grid && pokemonData) {
+                pokemonData.forEach(p => {
+                    const card = document.createElement("div");
+                    card.className = "pokemon-card";
+                    card.innerHTML = `
+                        <img src="${p.img}" alt="${p.name}" class="pokemon-sprite">
+                        <p>${p.name}</p>
+                    `;
+                    card.addEventListener("click", () => {
+                        document.querySelectorAll(".pokemon-card").forEach(c => c.classList.remove("selected"));
+                        card.classList.add("selected");
+                        selectedIdInput.value = p.id;
+                        selectedNameSpan.textContent = p.name;
+                    });
+                    grid.appendChild(card);
+                });
+            }
+
+            // Set current date
+            const currentDateElement = document.getElementById("currentDate");
+            if (currentDateElement) {
+                const currentDate = new Date();
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                currentDateElement.textContent = currentDate.toLocaleDateString('en-US', options);
+            }
+
+            // --- START REAL-TIME NOTIFICATION SYSTEM ---
+            console.log("🚀 Starting real-time notification system...");
+            
+            // 1. Start polling for notifications every 3 seconds
+            startNotificationPolling();
+            
+            // 2. Create new notifications automatically every 10 seconds
+            startAutoNotificationCreation();
+        });
+
+        function openPokemonModal() {
+            const welcomeModal = document.getElementById('welcomeModal');
+            const pokemonModal = document.getElementById('pokemonModal');
+            if (welcomeModal) welcomeModal.classList.remove('active');
+            if (pokemonModal) pokemonModal.classList.add('active');
+        }
+
+        // --- REAL-TIME NOTIFICATION SYSTEM ---
+        function startNotificationPolling() {
+            // Clear any existing interval
+            if (notificationPollInterval) {
+                clearInterval(notificationPollInterval);
+            }
+            
+            // Load immediately
+            loadNotifications();
+            
+            // Poll every 3 seconds
+            notificationPollInterval = setInterval(loadNotifications, 3000);
+            
+            console.log("✅ Polling active: Checking for new notifications every 3 seconds");
+        }
+
+        function startAutoNotificationCreation() {
+            // Clear any existing interval
+            if (notificationCreatorInterval) {
+                clearInterval(notificationCreatorInterval);
+            }
+            
+            // Create first notification immediately
+            createAutoNotification();
+            
+            // Create new notifications every 10 seconds
+            notificationCreatorInterval = setInterval(createAutoNotification, 10000);
+            
+            console.log("🔄 Auto-creator active: Creating notifications every 10 seconds");
+        }
+
+        function createAutoNotification() {
+            const notificationTypes = [
+                {
+                    title: "📚 Learning Reminder",
+                    message: "Time to practice your vocabulary words!"
+                },
+                {
+                    title: "🌟 Progress Update", 
+                    message: "Keep up the great work on your learning journey!"
+                },
+                {
+                    title: "⏰ Daily Check-in",
+                    message: "Have you learned a new word today?"
+                },
+                {
+                    title: "🎯 Challenge Alert",
+                    message: "Test your knowledge with a quick review session!"
+                },
+                {
+                    title: "✨ Motivation",
+                    message: "Every word you learn makes you smarter!"
+                },
+                {
+                    title: "🧠 Memory Boost",
+                    message: "Reviewing words regularly improves retention!"
+                },
+                {
+                    title: "🏆 Achievement",
+                    message: "You're making excellent progress!"
+                },
+                {
+                    title: "💡 Tip",
+                    message: "Try adding 3 new words to your collection today!"
+                }
+            ];
+            
+            // Pick a random notification
+            const randomIndex = Math.floor(Math.random() * notificationTypes.length);
+            const notification = notificationTypes[randomIndex];
+            
+            // Send to backend to create the notification
+            fetch('/api/create_auto_notification', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    title: notification.title,
+                    message: notification.message
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log(`📨 Auto-created: ${notification.title}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error creating auto-notification:', error);
+            });
+        }
+
+        function loadNotifications() {
+            fetch('/api/notifications')
+                .then(response => {
+                    if (!response.ok) throw new Error('Network error');
+                    return response.json();
+                })
+                .then(data => {
+                    if (!Array.isArray(data)) {
+                        console.error('Invalid response format');
+                        return;
+                    }
+                    
+                    // Store old unread count before update
+                    const oldUnreadCount = notifications.filter(n => n.unread).length;
+                    
+                    // Update notifications
+                    notifications = data;
+                    
+                    // Update UI
+                    updateNotificationUI();
+                    
+                    // Check if new unread notifications arrived
+                    const newUnreadCount = data.filter(n => n.unread).length;
+                    if (newUnreadCount > oldUnreadCount) {
+                        console.log(`🎯 New notification detected! Unread: ${newUnreadCount}`);
+                        animateNotificationBadge();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading notifications:', error);
+                });
+        }
+
+        function updateNotificationUI() {
+            const badge = document.getElementById('notificationBadge');
+            const notificationList = document.getElementById('notificationList');
+            
+            if (!badge) {
+                console.error('Notification badge not found!');
+                return;
+            }
+            
+            // Count unread notifications
+            const unreadCount = notifications.filter(n => n.unread).length;
+            
+            // Update badge
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                badge.style.display = 'flex';
+            } else {
+                badge.textContent = '0';
+                badge.style.display = 'none';
+            }
+            
+            // Update dropdown list if open
+            if (notificationList && isNotificationDropdownOpen) {
+                updateNotificationList(notificationList);
+            }
+        }
+
+        function updateNotificationList(listElement) {
+            listElement.innerHTML = '';
+            
+            if (notifications.length === 0) {
+                listElement.innerHTML = '<div class="no-notifications">No notifications yet!</div>';
+                return;
+            }
+            
+            // Show newest first
+            const sorted = [...notifications].sort((a, b) => {
+                const timeA = a.timestamp ? new Date(a.timestamp) : new Date(0);
+                const timeB = b.timestamp ? new Date(b.timestamp) : new Date(0);
+                return timeB - timeA;
+            });
+            
+            sorted.forEach(notification => {
+                const item = document.createElement('div');
+                item.className = `notification-item ${notification.unread ? 'unread' : ''}`;
+                item.onclick = () => markAsRead(notification.id);
+                
+                item.innerHTML = `
+                    <div class="notification-title">${notification.title || 'Notification'}</div>
+                    <div class="notification-message">${notification.message || ''}</div>
+                    <div class="notification-time">${notification.time || 'Just now'}</div>
+                `;
+                
+                listElement.appendChild(item);
+            });
+        }
+
+        function animateNotificationBadge() {
+            const badge = document.getElementById('notificationBadge');
+            if (!badge) return;
+            
+            badge.classList.add('badge-pulse');
+            setTimeout(() => badge.classList.remove('badge-pulse'), 1000);
+        }
+
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notificationDropdown');
+            if (!dropdown) return;
+            
+            isNotificationDropdownOpen = !isNotificationDropdownOpen;
+            dropdown.classList.toggle('active');
+            
+            if (isNotificationDropdownOpen) {
+                // Refresh list when opening
+                updateNotificationList(document.getElementById('notificationList'));
+            }
+        }
+
+        function clearAllNotifications() {
+            if (notifications.length === 0) {
+                alert("No notifications to clear!");
+                return;
+            }
+            
+            if (confirm('Are you sure you want to clear all notifications?')) {
+                fetch('/api/notifications/clear_all', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        notifications = [];
+                        updateNotificationUI();
+                        if (isNotificationDropdownOpen) {
+                            toggleNotifications();
+                        }
+                        alert("All notifications cleared!");
+                    }
+                });
+            }
+        }
+
+        function markAsRead(notificationId) {
+            fetch(`/api/notifications/mark_read/${notificationId}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update local state
+                    const notification = notifications.find(n => n.id === notificationId);
+                    if (notification) {
+                        notification.unread = false;
+                    }
+                    updateNotificationUI();
+                }
+            });
+        }
+
+        function confirmLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                // Clear any local data if needed
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                // Redirect to logout endpoint
+                window.location.href = "/logout";
+            }
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('notificationDropdown');
+            const button = document.querySelector('.notification-btn');
+            
+            if (!dropdown || !button) return;
+            
+            if (!button.contains(event.target) && !dropdown.contains(event.target) && isNotificationDropdownOpen) {
+                toggleNotifications();
+            }
+        });
+    </script>
+{% endblock %}
