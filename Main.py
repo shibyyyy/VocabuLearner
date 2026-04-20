@@ -18,8 +18,10 @@ import traceback
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'FinalProjectACP'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///vocabulearner.db'
+app.config['SECRET_KEY'] = 'FinalProjectADBMS'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:rainesebastian@localhost/vocabulearner'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
@@ -176,7 +178,6 @@ def update_user_streak(user):
 @app.route('/insert_achievement_samples')
 def insert_achievement_samples():
     try:
-        # Sample achievement data
         sample_achievements = [
             {
                 "name": "Vocabulary Novice",
@@ -216,21 +217,28 @@ def insert_achievement_samples():
             }
         ]
         
-        # Insert achievements with pokemon_id skipping by 3 (3, 6, 9, 12, 15, 18)
         pokemon_ids = list(range(3, 19, 3))  # [3, 6, 9, 12, 15, 18]
         
         achievements_added = 0
+        missing_pokemon_ids = []
+
         for i, achievement_data in enumerate(sample_achievements):
             if i < len(pokemon_ids):
-                # Check if achievement already exists
+                pokemon_id = pokemon_ids[i]
+
+                pokemon = Pokemon.query.get(pokemon_id)
+                if not pokemon:
+                    missing_pokemon_ids.append(pokemon_id)
+                    continue
+
                 existing = Achievement.query.filter_by(
                     name=achievement_data["name"],
-                    pokemon_id=pokemon_ids[i]
+                    pokemon_id=pokemon_id
                 ).first()
                 
                 if not existing:
                     new_achievement = Achievement(
-                        pokemon_id=pokemon_ids[i],
+                        pokemon_id=pokemon_id,
                         name=achievement_data["name"],
                         description=achievement_data["description"],
                         points_reward=achievement_data["points_reward"],
@@ -244,7 +252,8 @@ def insert_achievement_samples():
         return jsonify({
             "success": True,
             "message": f"Successfully added {achievements_added} sample achievements",
-            "pokemon_ids_used": pokemon_ids[:len(sample_achievements)]
+            "pokemon_ids_used": pokemon_ids[:len(sample_achievements)],
+            "missing_pokemon_ids": missing_pokemon_ids
         })
         
     except Exception as e:
@@ -253,7 +262,7 @@ def insert_achievement_samples():
             "success": False,
             "error": str(e)
         }), 500
-
+        
 @app.route('/create_admin_now')
 def create_admin_now():
     """ONE-TIME ROUTE to create admin account - REMOVE IN PRODUCTION!"""
@@ -768,10 +777,6 @@ def select_pokemon():
 def home():
     return render_template('index.html')
 
-
-from datetime import datetime
-
-
 @app.route('/api/update_profile', methods=['POST'])
 @login_required
 def update_profile():
@@ -802,7 +807,6 @@ def update_profile():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
-
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -2129,8 +2133,6 @@ def wordbank():
         words_with_ph_time.append((user_word, vocab, date_str))
     
     return render_template("wordbank.html", words=words_with_ph_time)
-
-
 
 
 @app.route('/review')

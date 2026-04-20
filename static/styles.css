@@ -7,7 +7,7 @@
     --text-secondary: #333333;
     --accent-color: #4169e1;
     --accent-secondary: #ff4444;
-    --header-bg: #228b22;
+    --header-bg: rgb(34, 139, 34);
     --card-bg: rgba(255, 255, 255, 0.95);
     --card-bg-light: rgba(255, 255, 255, 0.15);
     --border-color: #000000;
@@ -1923,6 +1923,83 @@ body::after {
     
     .word-actions {
         flex-direction: column;
+    }
+}
+
+.word-of-day-notice {
+    position: fixed;
+    top: 100px;
+    right: 20px;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    z-index: 1000;
+    animation: slideInRight 0.5s ease-out;
+    max-width: 350px;
+    }
+        
+    .notice-content {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+        
+    .notice-icon {
+        font-size: 24px;
+    }
+        
+    .notice-text {
+        flex: 1;
+    }
+        
+    .notice-text strong {
+        display: block;
+        font-size: 16px;
+        margin-bottom: 5px;
+    }
+        
+    .notice-text p {
+        font-size: 14px;
+        margin: 0;
+        opacity: 0.9;
+    }
+        
+    .notice-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        opacity: 0.7;
+        padding: 0;
+        line-height: 1;
+    }
+        
+    .notice-close:hover {
+        opacity: 1;
+    }
+        
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+        
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
     }
 }
 
@@ -6194,4 +6271,182 @@ body::after {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+.flash-message {
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 15px;
+        font-weight: 500;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        animation: slideIn 0.3s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+    
+.flash-message::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+    }
+    
+.flash-danger, .flash-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    }
+    
+.flash-danger::before, .flash-error::before {
+    background-color: #dc3545;
+    }
+    
+.flash-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    }
+    
+.flash-success::before {
+    background-color: #28a745;
+    }
+    
+.flash-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+    }
+    
+.flash-info::before {
+    background-color: #17a2b8;
+    }
+    
+.flash-icon {
+    font-size: 18px;
+    margin-right: 12px;
+    font-weight: bold;
+    }
+    
+.flash-text {
+    flex-grow: 1;
+    }
+    
+.flash-close {
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.7;
+    padding: 0;
+    margin-left: 15px;
+    line-height: 1;
+    }
+    
+.flash-close:hover {
+    opacity: 1;
+    }
+    
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+        }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        }
+    }
+
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    width: 100%;
+    padding-right: 40px;
+}
+
+.toggle-btn {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.pokemon-confirm-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 3000;
+    justify-content: center;
+    align-items: center;
+    padding: 30px 20px;
+    box-sizing: border-box;
+}
+
+.pokemon-confirm-modal.active {
+    display: flex;
+}
+
+.pokemon-confirm-content {
+    background: rgba(34, 139, 34);
+    border: 6px solid var(--border-color);
+    box-shadow: 12px 12px 0 var(--border-color);
+    padding: 30px;
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    animation: slideUp 0.3s ease;
+}
+
+.confirm-pokemon-img {
+    width: 120px;
+    height: 120px;
+    image-rendering: pixelated;
+    margin: 15px 0;
+}
+
+.confirm-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 25px;
+    flex-wrap: wrap;
+}
+
+.btn-cancel {
+    background: #888;    
+    color: #fff;
+    border: 4px solid var(--border-color);
+    padding: 15px 30px;
+    font-size: 12px;
+    box-shadow: 6px 6px 0 var(--border-color);
+    cursor: pointer;
+    text-transform: uppercase;
+    font-family: 'Press Start 2P', monospace;
+    margin-top: 20px;
+    transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+    transform: translate(3px, 3px);
+    box-shadow: 3px 3px 0 var(--border-color);
+}
+
+.btn-confirm2:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 6px 6px 0 var(--border-color);
 }

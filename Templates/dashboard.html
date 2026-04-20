@@ -156,14 +156,41 @@
             <div class="pokemon-grid" id="pokemonGrid"></div>
             <form action="{{ url_for('choose_partner') }}" method="POST" style="margin-top: 30px;">
                 <input type="hidden" name="pokemon_id" id="selectedPokemonId">
-                <button type="submit" class="btn-confirm">
+                <button type="submit" class="btn-confirm" id="startLearningBtn">
                     Start Learning with <span id="selectedPartnerName">Your Pokemon</span>!
                 </button>
             </form>
         </div>
     </div>
+
+    <div class="pokemon-confirm-modal" id="pokemonConfirmModal">
+        <div class="pokemon-confirm-content">
+            <h2>Confirm Your Partner</h2>
+            <img id="confirmPokemonImg" src="" alt="" class="confirm-pokemon-img">
+            <p>
+                Are you sure you want to choose
+                <span id="confirmPokemonName">this Pokémon</span>
+                as your learning partner?
+            </p>
+
+            <div class="confirm-actions">
+                <button type="button" class="btn-cancel" onclick="closePokemonConfirmModal()">Cancel</button>
+                <button type="button" class="btn-confirm" onclick="confirmPokemonSelection()">Yes, Choose This Pokémon</button>
+            </div>
+        </div>
+    </div>
     {% endif %}
 
+    <div class="modal" id="logoutModal">
+        <div class="modal-content">
+            <h2>Confirm Logout</h2>
+            <p>Are you sure you want to logout?</p>
+            <div class="modal-actions">
+                <button class="btn-confirm1" onclick="performLogout()">Yes, Logout</button>
+                <button class="btn-cancel1" onclick="closeLogoutModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Word of the Day Added Notice (will be shown via JavaScript) -->
     <div class="word-of-day-notice" id="wordOfDayNotice" style="display: none;">
@@ -201,92 +228,13 @@
         <p>© 2025 VocabuLearner</p>
     </footer>
 
-    <style>
-        /* Word of the Day Notice Styles */
-        .word-of-day-notice {
-            position: fixed;
-            top: 100px;
-            right: 20px;
-            background: linear-gradient(135deg, #4CAF50, #45a049);
-            color: white;
-            padding: 15px 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
-            z-index: 1000;
-            animation: slideInRight 0.5s ease-out;
-            max-width: 350px;
-        }
-        
-        .notice-content {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .notice-icon {
-            font-size: 24px;
-        }
-        
-        .notice-text {
-            flex: 1;
-        }
-        
-        .notice-text strong {
-            display: block;
-            font-size: 16px;
-            margin-bottom: 5px;
-        }
-        
-        .notice-text p {
-            font-size: 14px;
-            margin: 0;
-            opacity: 0.9;
-        }
-        
-        .notice-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            opacity: 0.7;
-            padding: 0;
-            line-height: 1;
-        }
-        
-        .notice-close:hover {
-            opacity: 1;
-        }
-        
-        @keyframes slideInRight {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        
-        @keyframes slideOutRight {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-        }
-    </style>
-
     <script>
         // --- Global Variables ---
         let notifications = [];
         let notificationPollInterval = null;
         let notificationCreatorInterval = null;
         let isNotificationDropdownOpen = false;
+        let pendingPokemon = null;
         
         // Notice persistence key
         const NOTICE_STORAGE_KEY = 'word_of_day_notice_shown';
@@ -367,12 +315,12 @@
             checkAndShowPersistentNotice();
             
             // Initialize Pokémon selection
-            const pokemonData = JSON.parse(document.getElementById("pokemonDataStorage").dataset.pokemons);
+            const pokemonStorage = document.getElementById("pokemonDataStorage");
             const grid = document.getElementById("pokemonGrid");
-            const selectedIdInput = document.getElementById("selectedPokemonId");
-            const selectedNameSpan = document.getElementById("selectedPartnerName");
 
-            if (grid && pokemonData) {
+            if (pokemonStorage && grid) {
+                const pokemonData = JSON.parse(pokemonStorage.dataset.pokemons);
+
                 pokemonData.forEach(p => {
                     const card = document.createElement("div");
                     card.className = "pokemon-card";
@@ -380,12 +328,22 @@
                         <img src="${p.img}" alt="${p.name}" class="pokemon-sprite">
                         <p>${p.name}</p>
                     `;
+
                     card.addEventListener("click", () => {
-                        document.querySelectorAll(".pokemon-card").forEach(c => c.classList.remove("selected"));
-                        card.classList.add("selected");
-                        selectedIdInput.value = p.id;
-                        selectedNameSpan.textContent = p.name;
+                        pendingPokemon = {
+                            id: p.id,
+                            name: p.name,
+                            img: p.img,
+                            card: card
+                        };
+
+                        document.getElementById("confirmPokemonImg").src = p.img;
+                        document.getElementById("confirmPokemonImg").alt = p.name;
+                        document.getElementById("confirmPokemonName").textContent = p.name;
+
+                        openPokemonConfirmModal();
                     });
+
                     grid.appendChild(card);
                 });
             }
@@ -663,14 +621,23 @@
         }
 
         function confirmLogout() {
-            if (confirm('Are you sure you want to logout?')) {
-                // Clear any local data if needed
-                localStorage.clear();
-                sessionStorage.clear();
-                
-                // Redirect to logout endpoint
-                window.location.href = "/logout";
+            const modal = document.getElementById("logoutModal");
+            if (modal) {
+                modal.classList.add("active");
             }
+        }
+
+        function closeLogoutModal() {
+            const modal = document.getElementById("logoutModal");
+            if (modal) {
+                modal.classList.remove("active");
+            }
+        }
+
+        function performLogout() {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = "/logout";
         }
 
         // Close dropdown when clicking outside
@@ -684,5 +651,85 @@
                 toggleNotifications();
             }
         });
+
+        const form = document.querySelector('#pokemonModal form');
+        const selectedIdInput = document.getElementById("selectedPokemonId");
+
+        if (form) {
+            form.addEventListener("submit", function (e) {
+                if (!selectedIdInput.value) {
+                    e.preventDefault(); // stop submission
+                    alert("⚠️ Please choose a Pokémon partner first!");
+                }
+            });
+        }
+        
+        function openPokemonConfirmModal() {
+            const confirmModal = document.getElementById("pokemonConfirmModal");
+            if (confirmModal) {
+                confirmModal.classList.add("active");
+            }
+        }
+
+        function closePokemonConfirmModal() {
+            const confirmModal = document.getElementById("pokemonConfirmModal");
+            if (confirmModal) {
+                confirmModal.classList.remove("active");
+            }
+            pendingPokemon = null;
+        }
+
+        function confirmPokemonSelection() {
+            if (!pendingPokemon) return;
+
+            const selectedIdInput = document.getElementById("selectedPokemonId");
+            const selectedNameSpan = document.getElementById("selectedPartnerName");
+            const startBtn = document.getElementById("startLearningBtn");
+
+            document.querySelectorAll(".pokemon-card").forEach(c => c.classList.remove("selected"));
+            pendingPokemon.card.classList.add("selected");
+
+            selectedIdInput.value = pendingPokemon.id;
+            selectedNameSpan.textContent = pendingPokemon.name;
+
+            if (startBtn) {
+                startBtn.disabled = false;
+            }
+
+            closePokemonConfirmModal();
+        }
     </script>
+
+<style> 
+    .modal-actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 20px;
+        }
+    .btn-confirm1, .btn-cancel1 {
+            border: 4px solid #000;
+            padding: 12px 25px;
+            font-size: 12px;
+            box-shadow: 6px 6px 0 #000;
+            cursor: pointer;
+            font-family: 'Press Start 2P', monospace;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            min-width: 140px;
+            text-align: center;
+        }
+        .btn-confirm1 {
+            background: #76c442;
+            color: #fff;
+        }
+        .btn-cancel1 {
+            background: #ff4444;
+            color: #fff;
+        }
+        .btn-confirm1:hover, .btn-cancel1:hover {
+            transform: translate(3px, 3px);
+            box-shadow: 3px 3px 0 #000;
+        }
+</style>
 {% endblock %}

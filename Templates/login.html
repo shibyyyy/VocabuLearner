@@ -50,7 +50,14 @@
             {% endfor %}
 
             <!-- Password field -->
-            {{ form.password }}
+            <div class="password-wrapper">
+                {{ form.password(id="password-field") }}
+
+                <button type="button" id="toggle-password" class="toggle-btn">
+                    👁
+                </button>
+            </div>
+
             {% for error in form.password.errors %}
                 <span class="error">{{ error }}</span>
             {% endfor %}
@@ -70,99 +77,6 @@
         <p>© 2025 VocabuLearner</p>
     </footer>
 
-    <style>
-    /* Flash Message Styles */
-    .flash-message {
-        display: flex;
-        align-items: center;
-        padding: 12px 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        font-size: 15px;
-        font-weight: 500;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        animation: slideIn 0.3s ease-out;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .flash-message::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 5px;
-    }
-    
-    .flash-danger, .flash-error {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-    }
-    
-    .flash-danger::before, .flash-error::before {
-        background-color: #dc3545;
-    }
-    
-    .flash-success {
-        background-color: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-    }
-    
-    .flash-success::before {
-        background-color: #28a745;
-    }
-    
-    .flash-info {
-        background-color: #d1ecf1;
-        color: #0c5460;
-        border: 1px solid #bee5eb;
-    }
-    
-    .flash-info::before {
-        background-color: #17a2b8;
-    }
-    
-    .flash-icon {
-        font-size: 18px;
-        margin-right: 12px;
-        font-weight: bold;
-    }
-    
-    .flash-text {
-        flex-grow: 1;
-    }
-    
-    .flash-close {
-        background: none;
-        border: none;
-        font-size: 22px;
-        cursor: pointer;
-        color: inherit;
-        opacity: 0.7;
-        padding: 0;
-        margin-left: 15px;
-        line-height: 1;
-    }
-    
-    .flash-close:hover {
-        opacity: 1;
-    }
-    
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    </style>
-
     <script>
     // Auto-hide flash messages after 5 seconds
     document.addEventListener('DOMContentLoaded', function() {
@@ -179,6 +93,17 @@
                 }, 500);
             }, 5000);
         });
+    });
+
+    const toggleBtn = document.getElementById("toggle-password");
+    const passwordField = document.getElementById("password-field");
+
+    toggleBtn.addEventListener("click", function () {
+        const type = passwordField.getAttribute("type") === "password" ? "text" : "password";
+        passwordField.setAttribute("type", type);
+
+        // Optional: change icon
+        this.textContent = type === "password" ? "👁" : "🙈";
     });
     </script>
 {% endblock %}

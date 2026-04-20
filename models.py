@@ -1,12 +1,11 @@
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 
-
 db = SQLAlchemy()
 
-
-# ---------------- POKEMON TABLE ----------------
 class Pokemon(db.Model):
+    __tablename__ = 'pokemon'
+
     pokemon_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     url = db.Column(db.String(200))
@@ -15,18 +14,20 @@ class Pokemon(db.Model):
     family_id = db.Column(db.Integer, nullable=False)
 
 
-# ---------------- ACHIEVEMENTS TABLE ----------------
 class Achievement(db.Model):
+    __tablename__ = 'achievement'
+
     achievement_id = db.Column(db.Integer, primary_key=True)
     pokemon_id = db.Column(db.Integer, db.ForeignKey('pokemon.pokemon_id'), nullable=False)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
     points_reward = db.Column(db.Integer, default=0)
-    requirement = db.Column(db.Integer,default=0)
+    requirement = db.Column(db.Integer, default=0)
 
 
-# ---------------- USER TABLE ----------------
 class UserAcc(db.Model):
+    __tablename__ = 'user_acc'
+
     user_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
@@ -41,22 +42,33 @@ class UserAcc(db.Model):
     profile_picture = db.Column(db.String(200))
     current_streak = db.Column(db.Integer, default=0)
     longest_streak = db.Column(db.Integer, default=0)
-    total_points = db.Column(db.Integer, default=0)  # Pokémon EXP
-    collected_pokemon = db.relationship('UserPokemon', backref='owner', lazy=True, cascade='all, delete-orphan')
-    
+    total_points = db.Column(db.Integer, default=0)
+
+    collected_pokemon = db.relationship(
+        'UserPokemon',
+        backref='owner',
+        lazy=True,
+        cascade='all, delete-orphan'
+    )
+
+
 class UserPokemon(db.Model):
+    __tablename__ = 'user_pokemon'
+
     user_pokemon_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user_acc.user_id'), nullable=False)
     pokemon_id = db.Column(db.Integer, db.ForeignKey('pokemon.pokemon_id'), nullable=False)
     date_obtained = db.Column(db.DateTime, nullable=False)
     custom_name = db.Column(db.String(100))
-    
-    # Optional: Add unique constraint to prevent duplicate entries
-    __table_args__ = (db.UniqueConstraint('user_id', 'pokemon_id', name='unique_user_pokemon'),)
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'pokemon_id', name='unique_user_pokemon'),
+    )
 
 
-# ---------------- VOCABULARY TABLE ----------------
 class Vocabulary(db.Model):
+    __tablename__ = 'vocabulary'
+
     word_id = db.Column(db.Integer, primary_key=True)
     word = db.Column(db.String(100), nullable=False)
     definition = db.Column(db.Text)
@@ -66,16 +78,18 @@ class Vocabulary(db.Model):
     is_word_of_day = db.Column(db.Boolean, default=False)
 
 
-# ---------------- USER WORDS TABLE ----------------
 class UserWords(db.Model):
+    __tablename__ = 'user_words'
+
     user_word_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user_acc.user_id'), nullable=False)
     word_id = db.Column(db.Integer, db.ForeignKey('vocabulary.word_id'), nullable=False)
     date_learned = db.Column(db.DateTime, default=datetime.utcnow)
 
 
-# ---------------- USER ACHIEVEMENTS TABLE ----------------
 class UserAchievement(db.Model):
+    __tablename__ = 'user_achievement'
+
     user_achievement_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user_acc.user_id'), nullable=False)
     achievement_id = db.Column(db.Integer, db.ForeignKey('achievement.achievement_id'), nullable=False)
@@ -83,12 +97,13 @@ class UserAchievement(db.Model):
     date_earned = db.Column(db.DateTime)
 
 
-# ---------------- NOTIFICATION TABLE ----------------  
 class Notification(db.Model):
+    __tablename__ = 'notification'
+
     notification_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user_acc.user_id'), nullable=False)
     title = db.Column(db.String(100), nullable=False)
     message = db.Column(db.Text, nullable=False)
-    notification_type = db.Column(db.String(50), nullable=False)  # e.g., 'achievement', 'streak', 'level_up', 'pokemon', 'reminder'
+    notification_type = db.Column(db.String(50), nullable=False)
     is_read = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
