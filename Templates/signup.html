@@ -5,22 +5,36 @@
 {% block content %}
 {% block header %}
     <div class="nav-links">
-            <a href="{{url_for('home')}}">Home</a>
-            <a href="{{url_for('challenges')}}">Vocab Challenges</a>
-            <a href="{{url_for('features')}}">Features</a>
-            <a href="{{url_for('login')}}" class="login-btn">Login</a>
-        </div>
-    {% endblock %}
+        <a href="{{url_for('home')}}">Home</a>
+        <a href="{{url_for('challenges')}}">Vocab Challenges</a>
+        <a href="{{url_for('features')}}">Features</a>
+        <a href="{{url_for('login')}}" class="login-btn">Login</a>
+    </div>
+{% endblock %}
+
 <div class="signup-container">
     <h1>Sign Up</h1>
     <p>Create your trainer account and start collecting words like Pokémon!</p>
     
-    <!-- ADD THIS SECTION -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-                <div style="background: #f8d7da; color: #721c24; padding: 10px; border-radius: 5px; margin-bottom: 15px; text-align: center;">
-                    {{ message }}
+                <div class="flash-message flash-{{ category }}">
+                    <span class="flash-icon">
+                        {% if category == 'danger' or category == 'error' %}
+                            ⚠️
+                        {% elif category == 'success' %}
+                            ✅
+                        {% elif category == 'info' %}
+                            ℹ️
+                        {% else %}
+                            •
+                        {% endif %}
+                    </span>
+                    <span class="flash-text">{{ message }}</span>
+                    <button type="button" class="flash-close" onclick="this.parentElement.style.display='none'">
+                        &times;
+                    </button>
                 </div>
             {% endfor %}
         {% endif %}
@@ -30,10 +44,30 @@
         {{ form.hidden_tag() }}
 
         {{ form.username(placeholder="Username") }}
-        {{ form.email(placeholder="Email") }}
-        {{ form.password(placeholder="Password") }}
-        {{ form.confirm_password(placeholder="Confirm Password") }}
+        {% for error in form.username.errors %}
+            <span class="error">{{ error }}</span>
+        {% endfor %}
 
+        {{ form.email(placeholder="Email") }}
+        {% for error in form.email.errors %}
+            <span class="error">{{ error }}</span>
+        {% endfor %}
+
+        <div class="password-wrapper">
+            {{ form.password(placeholder="Password", id="password-field") }}
+            <button type="button" id="toggle-password" class="toggle-btn">👁</button>
+        </div>
+        {% for error in form.password.errors %}
+            <span class="error">{{ error }}</span>
+        {% endfor %}
+
+        <div class="password-wrapper">
+            {{ form.confirm_password(placeholder="Confirm Password", id="confirm-password-field") }}
+            <button type="button" id="toggle-confirm-password" class="toggle-btn">👁</button>
+        </div>
+        {% for error in form.confirm_password.errors %}
+            <span class="error">{{ error }}</span>
+        {% endfor %}
 
         {{ form.submit(class="btn-primary") }}
     </form>
@@ -46,4 +80,40 @@
 <footer class="footer">
     <p>© 2025 VocabuLearner</p>
 </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const flashMessages = document.querySelectorAll('.flash-message');
+    flashMessages.forEach(message => {
+        setTimeout(() => {
+            message.style.transition = 'opacity 0.5s, transform 0.5s';
+            message.style.opacity = '0';
+            message.style.transform = 'translateY(-10px)';
+            setTimeout(() => {
+                if (message.parentElement) {
+                    message.parentElement.removeChild(message);
+                }
+            }, 500);
+        }, 5000);
+    });
+
+    const toggleBtn = document.getElementById("toggle-password");
+    const passwordField = document.getElementById("password-field");
+
+    toggleBtn.addEventListener("click", function () {
+        const type = passwordField.getAttribute("type") === "password" ? "text" : "password";
+        passwordField.setAttribute("type", type);
+        this.textContent = type === "password" ? "👁" : "🙈";
+    });
+
+    const toggleConfirmBtn = document.getElementById("toggle-confirm-password");
+    const confirmPasswordField = document.getElementById("confirm-password-field");
+
+    toggleConfirmBtn.addEventListener("click", function () {
+        const type = confirmPasswordField.getAttribute("type") === "password" ? "text" : "password";
+        confirmPasswordField.setAttribute("type", type);
+        this.textContent = type === "password" ? "👁" : "🙈";
+    });
+});
+</script>
 {% endblock %}

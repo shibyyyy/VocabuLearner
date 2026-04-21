@@ -18,6 +18,12 @@ import traceback
 
 
 app = Flask(__name__)
+@app.after_request
+def add_no_cache_headers(response):
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 app.config['SECRET_KEY'] = 'FinalProjectADBMS'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:rainesebastian@localhost:3306/vocabulearner'
@@ -74,8 +80,6 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-
-
 @app.route('/api/get_user_points')
 @login_required
 def get_user_points():
@@ -88,6 +92,11 @@ def get_user_points():
 
 def check_and_update_achievements(user):
     """Check all achievements and award them if user qualifies."""
+    
+    # Skip admins completely
+    if user.is_admin:
+        return
+
     all_achievements = Achievement.query.all()
     
     for achievement in all_achievements:
@@ -103,35 +112,26 @@ def check_and_update_achievements(user):
                 user_id=user.user_id,
                 achievement_id=achievement.achievement_id,
                 current_progress=0,
-                date_earned=None  # Explicitly set to None
+                date_earned=None
             )
             db.session.add(user_achievement)
         
         # Only update if not already earned
         if not user_achievement.date_earned:
-            # Calculate current progress based on achievement
             current_progress = 0
             
-            # WORD COLLECTOR ACHIEVEMENT - Learn 10 different words
             if "Word Collector" in achievement.name:
                 current_progress = UserWords.query.filter_by(user_id=user.user_id).count()
-                
-            # ZZZ ACHIEVEMENT - Logout for the first time
             elif "Zzz" in achievement.name:
                 current_progress = 1 if user.last_logout else 0
-                
-            # SOLO LEVELING ACHIEVEMENT - Reach 500 points
             elif "Solo Leveling" in achievement.name:
                 current_progress = user.total_points or 0
-                
-            # JOURNEY BEGINS ACHIEVEMENT - Welcome to VocabuLearner!
             elif "Journey Begins" in achievement.name:
-                current_progress = 1  # Always earned when account is created
+                current_progress = 1
             
-            # Update progress
             user_achievement.current_progress = current_progress
 
-        db.session.commit()
+    db.session.commit()
 
 def update_user_streak(user):
     
@@ -776,7 +776,16 @@ def select_pokemon():
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    if 'user_id' in session:
+        user = UserAcc.query.get(session['user_id'])
+
+        if user:
+            if user.is_admin:
+                return redirect(url_for('admin_dashboard'))
+            else:
+                return redirect(url_for('dashboard'))
+
+    return render_template('Index.html')
 
 @app.route('/api/update_profile', methods=['POST'])
 @login_required
@@ -895,15 +904,16 @@ def signup():
         
         try:
             # CREATE USERACHIEVEMENT ENTRIES FOR NEW USER
-            all_achievements = Achievement.query.all()
-            for achievement in all_achievements:
-                user_achievement = UserAchievement(
-                    user_id=new_user.user_id,  # This will work because user_id is auto-increment
-                    achievement_id=achievement.achievement_id,
-                    current_progress=0,
-                    date_earned=None
-                )
-                db.session.add(user_achievement)
+            if not new_user.is_admin:
+                all_achievements = Achievement.query.all()
+                for achievement in all_achievements:
+                    user_achievement = UserAchievement(
+            user_id=new_user.user_id,
+            achievement_id=achievement.achievement_id,
+            current_progress=0,
+            date_earned=None
+            )
+            db.session.add(user_achievement)
             
             db.session.commit()
             
@@ -2836,7 +2846,10 @@ def admin_users():
         word_count = UserWords.query.filter_by(user_id=user.user_id).count()
         
         # Get achievement count
-        achievement_count = UserAchievement.query.filter_by(user_id=user.user_id).count()
+        achievement_count = UserAchievement.query.filter(
+            UserAchievement.user_id == user.user_id,
+            UserAchievement.date_earned.isnot(None)
+        ).count()
         
         # Determine status based on is_active column
         user_status = "Active" if user.is_active else "Inactive"
@@ -2897,7 +2910,11 @@ def admin_users():
             view_form.pokemon_name.data = pokemon_name
             
             # Get achievement count
-            achievement_count = UserAchievement.query.filter_by(user_id=user.user_id).count()
+            achievement_count = UserAchievement.query.filter(
+                UserAchievement.user_id == user.user_id,
+                UserAchievement.date_earned.isnot(None)
+            ).count()
+
             view_form.achievement_count.data = str(achievement_count)
             
             view_form.last_login.data = user.last_login.strftime('%Y-%m-%d %H:%M') if user.last_login else 'Never'
@@ -3560,33 +3577,12 @@ def insert_sample_achievements():
     """Insert sample achievements with achievement Pokémon"""
     # First make sure we have achievement Pokémon
     achievement_pokemon = [
-        # Word Master achievements
-        ('Word Novice', 'Learn your first 10 words', 10, 50),
-        ('Word Apprentice', 'Master 50 vocabulary words', 50, 100),
-        ('Word Scholar', 'Master 100 vocabulary words', 100, 200),
-        ('Word Master', 'Master 250 vocabulary words', 250, 500),
-        ('Vocabulary King', 'Master 500 vocabulary words', 500, 1000),
-        
-        # Streak achievements
-        ('Streak Starter', 'Maintain a 3-day learning streak', 3, 50),
-        ('Weekly Warrior', 'Maintain a 7-day learning streak', 7, 100),
-        ('Monthly Master', 'Maintain a 30-day learning streak', 30, 500),
-        ('Dedicated Learner', 'Maintain a 90-day learning streak', 90, 1000),
-        
-        # Pokémon evolution achievements
-        ('First Evolution', 'Evolve your Pokémon for the first time', 1, 100),
-        ('Evolution Expert', 'Evolve your Pokémon 5 times', 5, 500),
-        ('Master Evolver', 'Evolve your Pokémon 10 times', 10, 1000),
-        
-        # Points achievements
-        ('Point Collector', 'Earn 100 total points', 100, 50),
-        ('Point Accumulator', 'Earn 500 total points', 500, 200),
-        ('Point Master', 'Earn 1000 total points', 1000, 500),
-        
-        # Special achievements
-        ('Daily Learner', 'Learn at least one word every day for a week', 7, 100),
-        ('Quick Learner', 'Learn 10 words in a single day', 10, 150),
-        ('Vocabulary Explorer', 'Learn words from 5 different categories', 5, 200),
+        ('Vocabulary Novice', 'Learn your first 10 words', 10, 100),
+        ('Word Collector', 'Learn 50 different words', 50, 250),
+        ('Flashcard Champion', 'Complete 20 flashcard sessions', 20, 300),
+        ('Zzz', 'Logout for the first time', 1, 50),
+        ('Solo Leveling', 'Reach 500 total points', 500, 400),
+        ('Journey Begins', 'Welcome to VocabuLearner!', 1, 50),
     ]
 
     # Get achievement Pokémon from database
@@ -3616,7 +3612,6 @@ def insert_sample_achievements():
 
     db.session.commit()
     return f"Sample achievements inserted successfully! {inserted_count} new achievements added."
-
     
 @app.route('/admin/analytics', methods=['GET', 'POST'])
 @admin_required
@@ -3790,7 +3785,11 @@ def admin_api_analytics_filter():
         
         # Calculate statistics for the date range
         # Total users (all users registered)
-        total_users = UserAcc.query.count()
+        total_users = UserAcc.query.filter(
+            UserAcc.date_created >= date_from,
+            UserAcc.date_created <= date_to,
+            UserAcc.is_admin == False
+        ).count()
         
         # Total words stored (within date range) - using date_learned column
         # Note: date_learned is stored in database time (UTC), need to compare properly

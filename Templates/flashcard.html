@@ -15,7 +15,11 @@
                 VocabuLearner
             </a>
     {% endblock %}
-    {%block header%}{%endblock%}
+    {% block header %}
+    <div class="header-actions">
+        <button class="logout-btn" onclick="confirmLogout()">Logout</button>
+    </div>
+    {% endblock %}
     <div class="dashboard-container">
         <!-- Back Button Added Here -->
         <div class="back-button-container">
@@ -133,6 +137,17 @@
                 <button class="btn-confirm" id="btn-close-popup">Awesome! Continue</button>
                 <!-- Also add Back button in EXP popup -->
                 <button class="btn-confirm back-to-review-popup" onclick="window.location.href='/review'" style="background: #666; margin-top: 10px;">Back to Review Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="logoutModal">
+        <div class="modal-content">
+            <h2>Confirm Logout</h2>
+            <p>Are you sure you want to logout?</p>
+            <div class="modal-actions">
+                <button class="btn-confirm1" onclick="performLogout()">Yes, Logout</button>
+                <button class="btn-cancel1" onclick="closeLogoutModal()">Cancel</button>
             </div>
         </div>
     </div>
@@ -592,5 +607,26 @@
 
         // Initialize when page loads
         window.addEventListener('DOMContentLoaded', loadVocabulary);
+
+        function confirmLogout() {
+            const modal = document.getElementById("logoutModal");
+            if (modal) {
+                modal.classList.add("active");
+            }
+        }
+
+        function closeLogoutModal() {
+            const modal = document.getElementById("logoutModal");
+            if (modal) {
+                modal.classList.remove("active");
+            }
+        }
+
+        function performLogout() {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = "/logout";
+        }
+        
     </script>
 {%endblock%}

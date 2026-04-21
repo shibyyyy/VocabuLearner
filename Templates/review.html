@@ -17,7 +17,12 @@
             VocabuLearner
         </a>
     {% endblock %}
-   
+   {% block header %}
+    <div class="header-actions">
+        <button class="logout-btn" onclick="confirmLogout()">Logout</button>
+    </div>
+    {% endblock %}
+
     <div class="review-container">
         <!-- Back Button -->
         <div class="back-button-container">
@@ -110,6 +115,16 @@
         </div>
     </div>
 
+    <div class="modal" id="logoutModal">
+        <div class="modal-content">
+            <h2>Confirm Logout</h2>
+            <p>Are you sure you want to logout?</p>
+            <div class="modal-actions">
+                <button class="btn-confirm1" onclick="performLogout()">Yes, Logout</button>
+                <button class="btn-cancel1" onclick="closeLogoutModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
 
     <footer class="footer">
         <p>© 2025 VocabuLearner</p>
@@ -298,6 +313,26 @@
                     modal.style.display = 'none';
                 }
             });
+        }
+        
+        function confirmLogout() {
+            const modal = document.getElementById("logoutModal");
+            if (modal) {
+                modal.classList.add("active");
+            }
+        }
+
+        function closeLogoutModal() {
+            const modal = document.getElementById("logoutModal");
+            if (modal) {
+                modal.classList.remove("active");
+            }
+        }
+
+        function performLogout() {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = "/logout";
         }
     </script>
 {%endblock%}

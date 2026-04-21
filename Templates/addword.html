@@ -13,7 +13,11 @@
     VocabuLearner
     </a>
     {% endblock %}
-    {% block header %}{% endblock %}
+    {% block header %}
+    <div class="header-actions">
+        <button class="logout-btn" onclick="confirmLogout()">Logout</button>
+    </div>
+    {% endblock %}
     {{ form.hidden_tag() }}
 
     <!-- WORD ENTRY FORM -->
@@ -161,6 +165,17 @@
         <button type="submit" class="btn-primary" id="addWordBtn">Add Word</button>
     </form>
 </div>
+
+    <div class="modal" id="logoutModal">
+        <div class="modal-content">
+            <h2>Confirm Logout</h2>
+            <p>Are you sure you want to logout?</p>
+            <div class="modal-actions">
+                <button class="btn-confirm1" onclick="performLogout()">Yes, Logout</button>
+                <button class="btn-cancel1" onclick="closeLogoutModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
 
 <!-- FOOTER -->
 <footer class="footer">
@@ -623,5 +638,26 @@ document.addEventListener('DOMContentLoaded', function() {
         validateSentence(exampleInput.value, true);
     }
 });
+
+function confirmLogout() {
+            const modal = document.getElementById("logoutModal");
+            if (modal) {
+                modal.classList.add("active");
+            }
+        }
+
+        function closeLogoutModal() {
+            const modal = document.getElementById("logoutModal");
+            if (modal) {
+                modal.classList.remove("active");
+            }
+        }
+
+        function performLogout() {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = "/logout";
+        }
+
 </script>
 {% endblock %}

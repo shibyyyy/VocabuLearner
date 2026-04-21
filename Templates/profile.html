@@ -13,11 +13,11 @@
                 VocabuLearner
             </a>
     {% endblock %}
-    {%block header%}
+    {% block header %}
     <div class="header-actions">
         <button class="logout-btn" onclick="confirmLogout()">Logout</button>
     </div>
-    {%endblock%}
+    {% endblock %}
    
     <div class="profile-container">
         <div class="back-button-container">
@@ -332,6 +332,17 @@
         </div>
     </div>
 
+    <div class="modal" id="logoutModal">
+        <div class="modal-content">
+            <h2>Confirm Logout</h2>
+            <p>Are you sure you want to logout?</p>
+            <div class="modal-actions">
+                <button class="btn-confirm1" onclick="performLogout()">Yes, Logout</button>
+                <button class="btn-cancel1" onclick="closeLogoutModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <footer class="footer">
         <p>© 2025 VocabuLearner • Profile Management</p>
     </footer>
@@ -353,18 +364,6 @@
             backdrop-filter: blur(5px);
         }
 
-        .modal-content {
-            background-color: #1a1a2e;
-            margin: 5% auto;
-            padding: 0;
-            border: 4px solid #ffd700;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 1200px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            font-family: 'Press Start 2P', monospace;
-            animation: modalSlideIn 0.3s ease-out;
-        }
 
         @keyframes modalSlideIn {
             from {
@@ -633,10 +632,6 @@
 
         /* Responsive design */
         @media (max-width: 768px) {
-            .modal-content {
-                margin: 2% auto;
-                width: 95%;
-            }
             
             .collection-stats {
                 grid-template-columns: 1fr;
@@ -1960,14 +1955,23 @@
         }
 
         function confirmLogout() {
-            if (confirm('Are you sure you want to logout?')) {
-                // Clear any local data if needed
-                localStorage.clear();
-                sessionStorage.clear();
-                
-                // Redirect to logout endpoint
-                window.location.href = "/logout";
+            const modal = document.getElementById("logoutModal");
+            if (modal) {
+                modal.classList.add("active");
             }
+        }
+
+        function closeLogoutModal() {
+            const modal = document.getElementById("logoutModal");
+            if (modal) {
+                modal.classList.remove("active");
+            }
+        }
+
+        function performLogout() {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = "/logout";
         }
     </script>
 {%endblock%}
