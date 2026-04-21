@@ -1,0 +1,1210 @@
+{%extends "base.html"%}
+{%block title%}
+    <title>WOTD Configuration - VocabuLearner Admin</title>
+{%endblock%}
+
+{%block content%}
+{%block logo_link %}
+    <a href="{{ url_for('admin_dashboard') }}" class="logo-link">
+        <div class="logo-icon">
+            <div class="pokeball-mini"></div>
+            <div class="pokeball-mini"></div>
+            <div class="pokeball-mini"></div>
+        </div>
+        VocabuLearner
+    </a>
+{% endblock %}
+
+{%block header%}
+    <div class="header-actions">
+        <button class="back-btn1" onclick="goToDashboard()">Back to Dashboard</button>
+        <button class="logout-btn" onclick="showLogoutConfirm()">Logout</button>
+    </div>
+{%endblock%}
+
+<style>
+    .management-container {
+        margin-top: 120px;
+        max-width: 1400px;
+        margin-left: auto;
+        margin-right: auto;
+        padding: 20px;
+        position: relative;
+        z-index: 10;
+    }
+
+    .page-header {
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        border: 4px solid #000;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 8px 8px 0 #000;
+        text-align: center;
+    }
+    .page-header h1 {
+        font-size: 24px;
+        color: #ffd700;
+        text-shadow: 4px 4px 0 #000;
+        margin-bottom: 15px;
+    }
+    .page-header p {
+        font-size: 12px;
+        color: #fff;
+        text-shadow: 2px 2px 0 #000;
+        margin-bottom: 20px;
+    }
+
+    .back-btn1 {
+        background: #4169e1;
+        color: #fff;
+        border: 3px solid #000;
+        padding: 8px 15px;
+        font-size: 10px;
+        box-shadow: 4px 4px 0 #000;
+        cursor: pointer;
+        text-transform: uppercase;
+        font-family: 'Press Start 2P', monospace;
+        transition: all 0.2s;
+    }
+    .back-btn1:hover {
+        transform: translate(2px, 2px);
+        box-shadow: 2px 2px 0 #000;
+        background: #3558c7;
+    }
+
+    .logout-btn {
+        background: #ff4444;
+        color: #fff;
+        border: 3px solid #000;
+        padding: 8px 15px;
+        font-size: 10px;
+        box-shadow: 4px 4px 0 #000;
+        cursor: pointer;
+        text-transform: uppercase;
+        font-family: 'Press Start 2P', monospace;
+        transition: all 0.2s;
+    }
+    .logout-btn:hover {
+        transform: translate(2px, 2px);
+        box-shadow: 2px 2px 0 #000;
+        background: #ff3333;
+    }
+
+    .action-btn {
+        background: #4169e1;
+        color: #fff;
+        border: 3px solid #000;
+        padding: 8px 12px;
+        font-size: 12px;
+        box-shadow: 3px 3px 0 #000;
+        cursor: pointer;
+        text-transform: uppercase;
+        font-family: 'Press Start 2P', monospace;
+        transition: all 0.2s;
+    }
+    .action-btn:hover {
+        transform: translate(2px, 2px);
+        box-shadow: 1px 1px 0 #000;
+    }
+    .action-btn.green {
+        background: #76c442;
+    }
+    .action-btn.red {
+        background: #ff4444;
+    }
+
+    .add-word-form {
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        border: 4px solid #000;
+        padding: 15px;
+        margin-bottom: 30px;
+        box-shadow: 8px 8px 0 #000;
+    }
+
+    .edit-word-form {
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        border: 4px solid #000;
+        padding: 25px;
+        margin-bottom: 30px;
+        box-shadow: 8px 8px 0 #000;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .search-section {
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        border: 4px solid #000;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 8px 8px 0 #000;
+    }
+
+    .search-row {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .search-input {
+        flex: 1;
+        min-width: 260px;
+        padding: 12px;
+        border: 3px solid #000;
+        background: rgba(255,255,255,0.9);
+        font-family: 'Press Start 2P', monospace;
+        font-size: 10px;
+        box-shadow: 4px 4px 0 #000;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        position: relative;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 10px;
+        color: #ffd700;
+        text-shadow: 2px 2px 0 #000;
+        margin-bottom: 8px;
+    }
+
+    .form-input,
+    .form-textarea,
+    .form-select {
+        width: 100%;
+        padding: 12px;
+        border: 3px solid #000;
+        background: rgba(255,255,255,0.9);
+        font-family: 'Press Start 2P', monospace;
+        font-size: 12px;
+        box-shadow: 4px 4px 0 #000;
+        box-sizing: border-box;
+    }
+
+    .form-textarea {
+        min-height: 70px;
+        resize: vertical;
+        line-height: 1.6;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 15px;
+        flex-wrap: wrap;
+    }
+
+    .dictionary-status {
+        margin-top: 10px;
+        padding: 10px;
+        background: rgba(255,255,255,0.2);
+        border: 2px solid #000;
+        color: #fff;
+        font-size: 9px;
+        text-shadow: 1px 1px 0 #000;
+        line-height: 1.5;
+    }
+
+    .words-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .word-card {
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        border: 4px solid #000;
+        padding: 20px;
+        box-shadow: 8px 8px 0 #000;
+        display: flex;
+        flex-direction: column;
+        min-height: 300px;
+        position: relative;
+    }
+
+    .word-content {
+        flex: 1;
+        margin-bottom: 15px;
+    }
+
+    .word-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 15px;
+        gap: 10px;
+    }
+
+    .word-title {
+        font-size: 18px;
+        color: #ffd700;
+        text-shadow: 3px 3px 0 #000;
+        max-width: 75%;
+        word-break: break-word;
+    }
+
+    .word-icon {
+        font-size: 28px;
+        flex-shrink: 0;
+    }
+
+    .word-desc {
+        font-size: 12px;
+        color: #fff;
+        text-shadow: 1px 1px 0 #000;
+        margin-bottom: 15px;
+        line-height: 1.6;
+        min-height: 80px;
+    }
+
+    .word-example {
+        font-size: 11px;
+        color: #fff;
+        text-shadow: 1px 1px 0 #000;
+        margin-bottom: 15px;
+        line-height: 1.6;
+        min-height: 70px;
+        opacity: 0.95;
+    }
+
+    .word-stats {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        gap: 10px;
+    }
+
+    .word-stat {
+        text-align: center;
+        flex: 1;
+        padding: 0 5px;
+    }
+
+    .stat-label {
+        font-size: 11px;
+        color: #fff;
+        opacity: 0.8;
+        margin-bottom: 4px;
+    }
+
+    .stat-number {
+        font-size: 13px;
+        color: #ffd700;
+        text-shadow: 2px 2px 0 #000;
+        word-break: break-word;
+    }
+
+    .word-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: auto;
+        padding-top: 15px;
+        border-top: 2px dashed rgba(255, 255, 255, 0.2);
+    }
+
+    .word-actions .action-btn {
+        flex: 1;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 80px;
+    }
+
+    .results-info {
+        text-align: center;
+        color: #fff;
+        font-size: 11px;
+        text-shadow: 2px 2px 0 #000;
+        margin-bottom: 20px;
+    }
+
+    .pagination-controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+    }
+
+    .pagination-btn {
+        background: #4169e1;
+        color: #fff;
+        border: 3px solid #000;
+        padding: 8px 15px;
+        font-size: 10px;
+        box-shadow: 4px 4px 0 #000;
+        cursor: pointer;
+        font-family: 'Press Start 2P', monospace;
+        min-width: 40px;
+    }
+
+    .pagination-btn:hover:not(:disabled) {
+        transform: translate(2px, 2px);
+        box-shadow: 2px 2px 0 #000;
+    }
+
+    .pagination-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .pagination-info {
+        color: #fff;
+        font-size: 10px;
+        text-shadow: 2px 2px 0 #000;
+        margin: 0 10px;
+    }
+
+    .page-input-container {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .page-input {
+        width: 50px;
+        padding: 5px;
+        border: 2px solid #000;
+        background: rgba(255,255,255,0.9);
+        font-family: 'Press Start 2P', monospace;
+        font-size: 10px;
+        text-align: center;
+    }
+
+    .page-input-btn {
+        background: #76c442;
+        color: #fff;
+        border: 2px solid #000;
+        padding: 5px 10px;
+        font-size: 9px;
+        cursor: pointer;
+        font-family: 'Press Start 2P', monospace;
+    }
+
+    .page-input-btn:hover {
+        transform: translate(1px, 1px);
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal.active {
+        display: flex;
+    }
+
+    .modal-content {
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(10px);
+        border: 4px solid #000;
+        padding: 40px;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 12px 12px 0 #000;
+        text-align: center;
+    }
+
+    .modal-content h2 {
+        font-size: 20px;
+        color: #228b22;
+        text-shadow: 3px 3px 0 #ffd700;
+        margin-bottom: 20px;
+    }
+
+    .modal-content p {
+        font-size: 12px;
+        color: #000;
+        margin-bottom: 20px;
+        line-height: 1.6;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .btn-confirm1 {
+        background: #76c442;
+        color: #fff;
+        border: 4px solid #000;
+        padding: 12px 25px;
+        font-size: 12px;
+        box-shadow: 6px 6px 0 #000;
+        cursor: pointer;
+        font-family: 'Press Start 2P', monospace;
+    }
+
+    .btn-cancel1 {
+        background: #ff4444;
+        color: #fff;
+        border: 4px solid #000;
+        padding: 12px 25px;
+        font-size: 12px;
+        box-shadow: 6px 6px 0 #000;
+        cursor: pointer;
+        font-family: 'Press Start 2P', monospace;
+    }
+
+    .btn-confirm1:hover,
+    .btn-cancel1:hover {
+        transform: translate(3px, 3px);
+        box-shadow: 3px 3px 0 #000;
+    }
+
+    @media (max-width: 900px) {
+        .words-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .header-actions {
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .search-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
+</style>
+
+<div class="management-container">
+    <div class="page-header">
+        <h1>WOTD Configuration</h1>
+        <p>Configure word entries, definitions, example sentences, and categories for Word of the Day.</p>
+    </div>
+
+    <div class="add-word-form" id="addWordForm">
+        <h2 style="color: #ffd700; text-shadow: 3px 3px 0 #000; margin-bottom: 10px; text-align: center;">Add New Word</h2>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Word</label>
+                <input type="text" class="form-input" placeholder="Enter word" id="wordInput" oninput="handleWordInput()">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Category</label>
+                <select class="form-select" id="categoryInput">
+                    <option value="">Select category</option>
+                    <option value="noun">Noun</option>
+                    <option value="adjective">Adjective</option>
+                    <option value="verb">Verb</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group full-width">
+                <label class="form-label">Definition</label>
+                <textarea class="form-textarea" placeholder="Definition will auto-fill, but can still be edited manually." id="definitionInput"></textarea>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group full-width">
+                <label class="form-label">Example Sentence</label>
+                <textarea class="form-textarea" placeholder="Example sentence will auto-fill, but can still be edited manually." id="exampleInput"></textarea>
+            </div>
+        </div>
+
+        <div class="dictionary-status" id="dictionaryStatus">
+            Dictionary API status: Waiting for word input.
+        </div>
+
+        <div class="form-actions">
+            <button class="action-btn green" onclick="addWord()">Add Word</button>
+            <button class="action-btn" onclick="clearForm()">Clear Form</button>
+        </div>
+    </div>
+
+    <div class="edit-word-form" id="editWordForm" style="display: none;">
+        <h2 style="color: #ffd700; text-shadow: 3px 3px 0 #000; margin-bottom: 20px; text-align: center;">Edit Word</h2>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Word</label>
+                <input type="text" class="form-input" placeholder="Enter word" id="editWordInput">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Category</label>
+                <select class="form-select" id="editCategoryInput">
+                    <option value="">Select category</option>
+                    <option value="noun">Noun</option>
+                    <option value="adjective">Adjective</option>
+                    <option value="verb">Verb</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group full-width">
+                <label class="form-label">Definition</label>
+                <textarea class="form-textarea" placeholder="Enter definition" id="editDefinitionInput"></textarea>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group full-width">
+                <label class="form-label">Example Sentence</label>
+                <textarea class="form-textarea" placeholder="Enter example sentence" id="editExampleInput"></textarea>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button class="action-btn green" onclick="saveWord()">Save Changes</button>
+            <button class="action-btn" onclick="cancelEdit()">Cancel Edit</button>
+        </div>
+    </div>
+
+    <div class="search-section">
+        <div class="search-row">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search by word, definition, example sentence, or category..." oninput="handleSearchInput()">
+            <button class="action-btn red" onclick="clearSearch()">Clear</button>
+        </div>
+    </div>
+
+    <div class="results-info" id="resultsInfo">
+        Showing 1-10 of 12 words
+    </div>
+
+    <div class="words-grid" id="wordsGrid">
+        <div class="word-card">
+            <div class="word-content">
+                <div class="word-header">
+                    <h3 class="word-title">Eloquent</h3>
+                    <div class="word-icon">📘</div>
+                </div>
+                <p class="word-desc">Fluent or persuasive in speaking or writing.</p>
+                <p class="word-example"><strong>Example:</strong> She gave an eloquent speech during the awarding ceremony.</p>
+                <div class="word-stats">
+                    <div class="word-stat">
+                        <div class="stat-label">Category</div>
+                        <div class="stat-number">Academic</div>
+                    </div>
+                    <div class="word-stat">
+                        <div class="stat-label">Status</div>
+                        <div class="stat-number">Active</div>
+                    </div>
+                </div>
+            </div>
+            <div class="word-actions">
+                <button class="action-btn" onclick="editWord(1)">Edit</button>
+                <button class="action-btn red" onclick="deleteWord(1)">Delete</button>
+            </div>
+        </div>
+
+        <div class="word-card">
+            <div class="word-content">
+                <div class="word-header">
+                    <h3 class="word-title">Meticulous</h3>
+                    <div class="word-icon">📗</div>
+                </div>
+                <p class="word-desc">Showing great attention to detail; very careful and precise.</p>
+                <p class="word-example"><strong>Example:</strong> He kept meticulous notes for every vocabulary lesson.</p>
+                <div class="word-stats">
+                    <div class="word-stat">
+                        <div class="stat-label">Category</div>
+                        <div class="stat-number">General</div>
+                    </div>
+                    <div class="word-stat">
+                        <div class="stat-label">Status</div>
+                        <div class="stat-number">Active</div>
+                    </div>
+                </div>
+            </div>
+            <div class="word-actions">
+                <button class="action-btn" onclick="editWord(2)">Edit</button>
+                <button class="action-btn red" onclick="deleteWord(2)">Delete</button>
+            </div>
+        </div>
+
+        <div class="word-card">
+            <div class="word-content">
+                <div class="word-header">
+                    <h3 class="word-title">Pragmatic</h3>
+                    <div class="word-icon">📙</div>
+                </div>
+                <p class="word-desc">Dealing with things sensibly and realistically.</p>
+                <p class="word-example"><strong>Example:</strong> Her pragmatic approach helped the team solve the issue quickly.</p>
+                <div class="word-stats">
+                    <div class="word-stat">
+                        <div class="stat-label">Category</div>
+                        <div class="stat-number">Business</div>
+                    </div>
+                    <div class="word-stat">
+                        <div class="stat-label">Status</div>
+                        <div class="stat-number">Active</div>
+                    </div>
+                </div>
+            </div>
+            <div class="word-actions">
+                <button class="action-btn" onclick="editWord(3)">Edit</button>
+                <button class="action-btn red" onclick="deleteWord(3)">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="pagination-controls">
+        <button class="pagination-btn" onclick="goToPage(1)">««</button>
+        <button class="pagination-btn" onclick="goToPreviousPage()">«</button>
+        <span class="pagination-info" id="pageInfo">Page 1 of 2</span>
+        <button class="pagination-btn" onclick="goToNextPage()">»</button>
+        <button class="pagination-btn" onclick="goToLastPage()">»»</button>
+        <div class="page-input-container">
+            <input type="number" class="page-input" id="pageInput" min="1" value="1">
+            <button class="page-input-btn" onclick="goToSpecificPage()">Go</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="deleteWordModal">
+    <div class="modal-content">
+        <h2>Delete Word</h2>
+        <p>Are you sure you want to delete this word entry? This action cannot be undone.</p>
+        <div class="modal-actions">
+            <button class="btn-confirm1" onclick="confirmDeleteWord()">Delete</button>
+            <button class="btn-cancel1" onclick="closeModal('deleteWordModal')">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="logoutModal">
+    <div class="modal-content">
+        <h2>Confirm Logout</h2>
+        <p>Are you sure you want to logout?</p>
+        <div class="modal-actions">
+            <button class="btn-confirm1" onclick="performLogout()">Yes, Logout</button>
+            <button class="btn-cancel1" onclick="closeModal('logoutModal')">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentWordId = null;
+    let currentPage = 1;
+    let currentSearch = '';
+    const perPage = 12;
+
+    let currentLookupWord = '';
+    let lookupTimeout = null;
+    let searchTimeout = null;
+
+    function goToDashboard() {
+        window.location.href = "{{ url_for('admin_dashboard') }}";
+    }
+
+    function showLogoutConfirm() {
+        document.getElementById('logoutModal').classList.add('active');
+    }
+
+    function performLogout() {
+        window.location.href = "{{ url_for('logout') }}";
+    }
+
+    function showModal(modalId) {
+        document.getElementById(modalId).classList.add('active');
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+    }
+
+    function escapeHtml(value) {
+        if (value === null || value === undefined) return '';
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function capitalizeCategory(category) {
+        if (!category) return '';
+        return category.charAt(0).toUpperCase() + category.slice(1);
+    }
+
+    function setDictionaryStatus(message) {
+        const status = document.getElementById('dictionaryStatus');
+        if (status) {
+            status.textContent = message;
+        }
+    }
+
+    function handleWordInput() {
+        const word = document.getElementById('wordInput').value.trim().toLowerCase();
+
+        clearTimeout(lookupTimeout);
+
+        const definitionInput = document.getElementById('definitionInput');
+        const exampleInput = document.getElementById('exampleInput');
+        const categoryInput = document.getElementById('categoryInput');
+
+        delete definitionInput.dataset.modified;
+        delete exampleInput.dataset.modified;
+        delete categoryInput.dataset.modified;
+
+        definitionInput.value = '';
+        exampleInput.value = '';
+        categoryInput.value = '';
+
+        if (!word) {
+            currentLookupWord = '';
+            setDictionaryStatus('Dictionary API status: Waiting for word input.');
+            return;
+        }
+
+        currentLookupWord = word;
+        setDictionaryStatus('Dictionary API status: Looking up...');
+
+        lookupTimeout = setTimeout(() => {
+            autoFillFromDictionary(word);
+        }, 250);
+    }
+
+    async function autoFillFromDictionary(word) {
+        try {
+            const response = await fetch(`/admin/wotd/api/dictionary_lookup?word=${encodeURIComponent(word)}`);
+            const data = await response.json();
+
+            if (word !== currentLookupWord) {
+                return;
+            }
+
+            if (!response.ok || !data.success) {
+                setDictionaryStatus(data.error || 'No result found.');
+                return;
+            }
+
+            const definitionInput = document.getElementById('definitionInput');
+            const exampleInput = document.getElementById('exampleInput');
+            const categoryInput = document.getElementById('categoryInput');
+
+            if (!definitionInput.dataset.modified && data.definition) {
+                definitionInput.value = data.definition;
+            }
+
+            if (!exampleInput.dataset.modified && data.example_sentence) {
+                exampleInput.value = data.example_sentence;
+            }
+
+            if (!categoryInput.dataset.modified && data.category) {
+                categoryInput.value = data.category;
+            }
+
+            setDictionaryStatus('Auto-filled. You can still edit manually.');
+        } catch (error) {
+            console.error('Dictionary lookup error:', error);
+            setDictionaryStatus('Dictionary lookup failed.');
+        }
+    }
+
+    async function loadWords(page = 1, search = '') {
+        try {
+            const response = await fetch(`/admin/wotd/api/list?page=${page}&search=${encodeURIComponent(search)}`);
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                alert(data.error || 'Failed to load words.');
+                return;
+            }
+
+            currentPage = data.pagination.page;
+            currentSearch = search;
+
+            renderWords(data.words);
+            updateResultsInfo(data.pagination);
+            updatePaginationControls(data.pagination);
+        } catch (error) {
+            console.error('Load words error:', error);
+            alert('Failed to load words.');
+        }
+    }
+
+    function renderWords(words) {
+        const grid = document.getElementById('wordsGrid');
+
+        if (!grid) return;
+
+        if (!words || words.length === 0) {
+            grid.innerHTML = `
+                <div class="word-card" style="grid-column: 1 / -1; text-align: center;">
+                    <div class="word-content">
+                        <div class="word-header" style="justify-content: center;">
+                            <h3 class="word-title" style="max-width: 100%;">No words found</h3>
+                        </div>
+                        <p class="word-desc" style="min-height: auto;">Try a different search or add a new word.</p>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        grid.innerHTML = words.map(word => `
+            <div class="word-card">
+                <div class="word-content">
+                    <div class="word-header">
+                        <h3 class="word-title">${escapeHtml(word.word)}</h3>
+                        <div class="word-icon">📘</div>
+                    </div>
+                    <p class="word-desc">${escapeHtml(word.definition || 'No definition available.')}</p>
+                    <p class="word-example"><strong>Example:</strong> ${escapeHtml(word.example_sentence || 'No example sentence available.')}</p>
+                    <div class="word-stats">
+                        <div class="word-stat">
+                            <div class="stat-label">Category</div>
+                            <div class="stat-number">${escapeHtml(capitalizeCategory(word.category || ''))}</div>
+                        </div>
+                        <div class="word-stat">
+                            <div class="stat-label">WOTD</div>
+                            <div class="stat-number">${word.is_word_of_day ? 'Yes' : 'No'}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="word-actions">
+                    <button class="action-btn" onclick="editWord(${word.word_id})">Edit</button>
+                    <button class="action-btn red" onclick="deleteWord(${word.word_id}, '${escapeHtml(word.word)}')">Delete</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function updateResultsInfo(pagination) {
+        const resultsInfo = document.getElementById('resultsInfo');
+        if (!resultsInfo) return;
+
+        if (pagination.total === 0) {
+            resultsInfo.textContent = 'Showing 0 words';
+            return;
+        }
+
+        const start = ((pagination.page - 1) * pagination.per_page) + 1;
+        const end = Math.min(start + pagination.per_page - 1, pagination.total);
+        resultsInfo.textContent = `Showing ${start}-${end} of ${pagination.total} words`;
+    }
+
+    function updatePaginationControls(pagination) {
+        const pageInfo = document.getElementById('pageInfo');
+        const pageInput = document.getElementById('pageInput');
+
+        if (pageInfo) {
+            pageInfo.textContent = `Page ${pagination.page} of ${pagination.pages || 1}`;
+        }
+
+        if (pageInput) {
+            pageInput.value = pagination.page;
+            pageInput.max = pagination.pages || 1;
+        }
+
+        const buttons = document.querySelectorAll('.pagination-btn');
+        if (buttons.length >= 4) {
+            buttons[0].disabled = pagination.page <= 1;
+            buttons[1].disabled = pagination.page <= 1;
+            buttons[2].disabled = pagination.page >= pagination.pages;
+            buttons[3].disabled = pagination.page >= pagination.pages;
+        }
+    }
+
+    async function addWord() {
+        const word = document.getElementById('wordInput').value.trim();
+        const definition = document.getElementById('definitionInput').value.trim();
+        const example_sentence = document.getElementById('exampleInput').value.trim();
+        const category = document.getElementById('categoryInput').value;
+
+        if (!word || !definition || !example_sentence || !category) {
+            alert('Please fill in all fields.');
+            return;
+        }
+
+        try {
+            const response = await fetch('/admin/wotd/api/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    word,
+                    definition,
+                    example_sentence,
+                    category,
+                    is_word_of_day: true
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                alert(data.error || 'Failed to add word.');
+                return;
+            }
+
+            alert(data.message);
+            clearForm();
+            await loadWords(1, currentSearch);
+        } catch (error) {
+            console.error('Add word error:', error);
+            alert('Failed to add word.');
+        }
+    }
+
+    function clearForm() {
+        const definitionInput = document.getElementById('definitionInput');
+        const exampleInput = document.getElementById('exampleInput');
+        const categoryInput = document.getElementById('categoryInput');
+
+        document.getElementById('wordInput').value = '';
+        definitionInput.value = '';
+        exampleInput.value = '';
+        categoryInput.value = '';
+
+        delete definitionInput.dataset.modified;
+        delete exampleInput.dataset.modified;
+        delete categoryInput.dataset.modified;
+
+        currentLookupWord = '';
+        setDictionaryStatus('Dictionary API status: Waiting for word input.');
+    }
+
+    async function editWord(wordId) {
+        try {
+            const response = await fetch(`/admin/wotd/api/${wordId}`);
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                alert(data.error || 'Failed to load word details.');
+                return;
+            }
+
+            const word = data.word;
+            currentWordId = word.word_id;
+
+            document.getElementById('addWordForm').style.display = 'none';
+            document.getElementById('editWordForm').style.display = 'block';
+
+            document.getElementById('editWordInput').value = word.word || '';
+            document.getElementById('editDefinitionInput').value = word.definition || '';
+            document.getElementById('editExampleInput').value = word.example_sentence || '';
+            document.getElementById('editCategoryInput').value = word.category || '';
+
+            document.getElementById('editWordForm').scrollIntoView({ behavior: 'smooth' });
+        } catch (error) {
+            console.error('Edit word load error:', error);
+            alert('Failed to load word details.');
+        }
+    }
+
+    async function saveWord() {
+        if (!currentWordId) {
+            alert('No word selected for editing.');
+            return;
+        }
+
+        const word = document.getElementById('editWordInput').value.trim();
+        const definition = document.getElementById('editDefinitionInput').value.trim();
+        const example_sentence = document.getElementById('editExampleInput').value.trim();
+        const category = document.getElementById('editCategoryInput').value;
+
+        if (!word || !definition || !example_sentence || !category) {
+            alert('Please fill in all fields.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/admin/wotd/api/update/${currentWordId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    word,
+                    definition,
+                    example_sentence,
+                    category,
+                    is_word_of_day: true
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                alert(data.error || 'Failed to update word.');
+                return;
+            }
+
+            alert(data.message);
+            cancelEdit();
+            await loadWords(currentPage, currentSearch);
+        } catch (error) {
+            console.error('Save word error:', error);
+            alert('Failed to update word.');
+        }
+    }
+
+    function cancelEdit() {
+        document.getElementById('editWordForm').style.display = 'none';
+        document.getElementById('addWordForm').style.display = 'block';
+        currentWordId = null;
+        document.getElementById('addWordForm').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function deleteWord(wordId, wordText = '') {
+        currentWordId = wordId;
+
+        const modal = document.getElementById('deleteWordModal');
+        const paragraph = modal.querySelector('p');
+
+        if (paragraph && wordText) {
+            paragraph.textContent = `Are you sure you want to delete "${wordText}"? This action cannot be undone.`;
+        }
+
+        showModal('deleteWordModal');
+    }
+
+    async function confirmDeleteWord() {
+        if (!currentWordId) return;
+
+        try {
+            const response = await fetch(`/admin/wotd/api/delete/${currentWordId}`, {
+                method: 'DELETE'
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                alert(data.error || 'Failed to delete word.');
+                return;
+            }
+
+            alert(data.message);
+            closeModal('deleteWordModal');
+            currentWordId = null;
+            await loadWords(currentPage, currentSearch);
+        } catch (error) {
+            console.error('Delete word error:', error);
+            alert('Failed to delete word.');
+        }
+    }
+
+    function clearSearch() {
+        document.getElementById('searchInput').value = '';
+        currentSearch = '';
+        loadWords(1, '');
+    }
+
+    function handleSearchInput() {
+    const searchValue = document.getElementById('searchInput').value.trim();
+
+    clearTimeout(searchTimeout);
+
+    searchTimeout = setTimeout(() => {
+        currentSearch = searchValue;
+        loadWords(1, currentSearch);
+    }, 300); // debounce
+}
+
+    function goToPage(page) {
+        const targetPage = parseInt(page, 10);
+        if (!isNaN(targetPage) && targetPage >= 1) {
+            loadWords(targetPage, currentSearch);
+        }
+    }
+
+    function goToPreviousPage() {
+        if (currentPage > 1) {
+            loadWords(currentPage - 1, currentSearch);
+        }
+    }
+
+    function goToNextPage() {
+        loadWords(currentPage + 1, currentSearch);
+    }
+
+    function goToLastPage() {
+        const pageInfo = document.getElementById('pageInfo');
+        if (!pageInfo) return;
+
+        const match = pageInfo.textContent.match(/Page\s+\d+\s+of\s+(\d+)/i);
+        if (match) {
+            const lastPage = parseInt(match[1], 10);
+            loadWords(lastPage, currentSearch);
+        }
+    }
+
+    function goToSpecificPage() {
+        const page = parseInt(document.getElementById('pageInput').value, 10);
+        if (!isNaN(page) && page >= 1) {
+            loadWords(page, currentSearch);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const definitionInput = document.getElementById('definitionInput');
+        const exampleInput = document.getElementById('exampleInput');
+        const categoryInput = document.getElementById('categoryInput');
+
+        definitionInput.addEventListener('input', function() {
+            this.dataset.modified = true;
+        });
+
+        exampleInput.addEventListener('input', function() {
+            this.dataset.modified = true;
+        });
+
+        categoryInput.addEventListener('change', function() {
+            this.dataset.modified = true;
+        });
+
+        loadWords(1, '');
+    });
+
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.classList.remove('active');
+        }
+    };
+</script>
+{%endblock%}

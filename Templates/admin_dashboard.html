@@ -94,10 +94,10 @@
         .trend-down { color: #ff4444; }
 
         .admin-nav-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 20px;
+        margin-bottom: 30px;
         }
         .admin-nav-card {
             background: rgba(255,255,255,0.15);
@@ -341,30 +341,37 @@
         </div>
 
         <div class="admin-nav-grid">
-            <div class="admin-nav-card" onclick="navigateTo('{{ url_for('admin_users') }}')">
-                <div class="nav-icon">👥</div>
-                <h3>User Management</h3>
-                <p>View, edit, and manage all user accounts and permissions</p>
-            </div>
-           
-            <div class="admin-nav-card" onclick="navigateTo('{{ url_for('admin_achievements') }}')">
-                <div class="nav-icon">🏆</div>
-                <h3>Achievements & Rewards</h3>
-                <p>Configure achievements, badges, and reward systems</p>
-            </div>
-           
-            <div class="admin-nav-card" onclick="navigateTo('{{ url_for('pokemon_config') }}')">
-                <div class="nav-icon">🔧</div>
-                <h3>Pokémon Configuration</h3>
-                <p>Manage starter Pokémon, evolution paths, and rewards</p>
-            </div>
-           
-            <div class="admin-nav-card" onclick="navigateTo('{{ url_for('admin_analytics') }}')">
-                <div class="nav-icon">📊</div>
-                <h3>Analytics Dashboard</h3>
-                <p>View detailed learning analytics and performance metrics</p>
-            </div>
-        </div>
+    <div class="admin-nav-card" onclick="navigateTo('{{ url_for('admin_users') }}')">
+        <div class="nav-icon">👥</div>
+        <h3>User Management</h3>
+        <p>View, edit, and manage all user accounts and permissions</p>
+    </div>
+   
+    <div class="admin-nav-card" onclick="navigateTo('{{ url_for('admin_achievements') }}')">
+        <div class="nav-icon">🏆</div>
+        <h3>Achievements & Rewards</h3>
+        <p>Configure achievements, badges, and reward systems</p>
+    </div>
+   
+    <div class="admin-nav-card" onclick="navigateTo('{{ url_for('pokemon_config') }}')">
+        <div class="nav-icon">🔧</div>
+        <h3>Pokémon Configuration</h3>
+        <p>Manage starter Pokémon, evolution paths, and rewards</p>
+    </div>
+
+    <!-- ✅ NEW CARD (SAFE - NO ROUTE YET) -->
+    <div class="admin-nav-card" onclick="navigateTo('{{ url_for('wotd_config') }}')">
+    <div class="nav-icon">📅</div>
+    <h3>WOTD Configuration</h3>
+    <p>Manage word of the day content and settings</p>
+</div>
+   
+    <div class="admin-nav-card" onclick="navigateTo('{{ url_for('admin_analytics') }}')">
+        <div class="nav-icon">📊</div>
+        <h3>Analytics Dashboard</h3>
+        <p>View detailed learning analytics and performance metrics</p>
+    </div>
+</div>
 
         <div class="activity-section">
             <h2>Recent Activity</h2>

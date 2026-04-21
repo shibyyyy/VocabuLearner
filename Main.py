@@ -20,7 +20,8 @@ import traceback
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'FinalProjectADBMS'
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:rainesebastian@localhost/vocabulearner'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:rainesebastian@localhost:3306/vocabulearner'
+
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -4266,6 +4267,401 @@ def export_analytics():
         print(f"Export error: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
+# ========== WOTD CONFIGURATION ROUTES ==========
+
+@app.route('/admin/wotd-config')
+@admin_required
+def wotd_config():
+    search_term = request.args.get('search', '').strip()
+    page = request.args.get('page', 1, type=int)
+    per_page = 12
+
+    query = Vocabulary.query
+
+    if search_term:
+        like_term = f"%{search_term}%"
+        query = query.filter(
+            or_(
+                Vocabulary.word.ilike(like_term),
+                Vocabulary.definition.ilike(like_term),
+                Vocabulary.example_sentence.ilike(like_term),
+                Vocabulary.category.ilike(like_term)
+            )
+        )
+
+    query = query.order_by(Vocabulary.word.asc())
+
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+
+    allowed_categories = ['noun', 'adjective', 'verb']
+
+    return render_template(
+        'wotd_config.html',
+        words=pagination.items,
+        pagination=pagination,
+        search_term=search_term,
+        allowed_categories=allowed_categories
+    )
+
+
+@app.route('/admin/wotd/api/list')
+@admin_required
+def wotd_list_api():
+    search_term = request.args.get('search', '').strip()
+    page = request.args.get('page', 1, type=int)
+    per_page = 12
+
+    query = Vocabulary.query
+
+    if search_term:
+        like_term = f"%{search_term}%"
+        query = query.filter(
+            or_(
+                Vocabulary.word.ilike(like_term),
+                Vocabulary.definition.ilike(like_term),
+                Vocabulary.example_sentence.ilike(like_term),
+                Vocabulary.category.ilike(like_term)
+            )
+        )
+
+    query = query.order_by(Vocabulary.word.asc())
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+
+    words_data = []
+    for word in pagination.items:
+        words_data.append({
+            'word_id': word.word_id,
+            'word': word.word,
+            'definition': word.definition or '',
+            'example_sentence': word.example_sentence or '',
+            'category': word.category or '',
+            'points_value': word.points_value,
+            'is_word_of_day': word.is_word_of_day
+        })
+
+    return jsonify({
+        'success': True,
+        'words': words_data,
+        'pagination': {
+            'page': pagination.page,
+            'pages': pagination.pages,
+            'per_page': per_page,
+            'total': pagination.total,
+            'has_next': pagination.has_next,
+            'has_prev': pagination.has_prev
+        }
+    })
+
+
+@app.route('/admin/wotd/api/<int:word_id>')
+@admin_required
+def get_wotd_word(word_id):
+    word = Vocabulary.query.get(word_id)
+
+    if not word:
+        return jsonify({
+            'success': False,
+            'error': 'Word not found'
+        }), 404
+
+    return jsonify({
+        'success': True,
+        'word': {
+            'word_id': word.word_id,
+            'word': word.word,
+            'definition': word.definition or '',
+            'example_sentence': word.example_sentence or '',
+            'category': word.category or '',
+            'points_value': word.points_value,
+            'is_word_of_day': word.is_word_of_day
+        }
+    })
+
+
+@app.route('/admin/wotd/api/add', methods=['POST'])
+@admin_required
+def add_wotd_word():
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'No data provided'
+            }), 400
+
+        word_text = (data.get('word') or '').strip().lower()
+        definition = (data.get('definition') or '').strip()
+        example_sentence = (data.get('example_sentence') or '').strip()
+        category = (data.get('category') or '').strip().lower()
+        is_word_of_day = bool(data.get('is_word_of_day', True))
+
+        allowed_categories = ['noun', 'adjective', 'verb']
+
+        if not word_text:
+            return jsonify({
+                'success': False,
+                'error': 'Word is required'
+            }), 400
+
+        if not definition:
+            return jsonify({
+                'success': False,
+                'error': 'Definition is required'
+            }), 400
+
+        if not example_sentence:
+            return jsonify({
+                'success': False,
+                'error': 'Example sentence is required'
+            }), 400
+
+        if category not in allowed_categories:
+            return jsonify({
+                'success': False,
+                'error': 'Category must be noun, adjective, or verb'
+            }), 400
+
+        existing_word = Vocabulary.query.filter(
+            func.lower(Vocabulary.word) == word_text
+        ).first()
+
+        if existing_word:
+            return jsonify({
+                'success': False,
+                'error': 'Duplicate word is not allowed'
+            }), 400
+
+        new_word = Vocabulary(
+            word=word_text,
+            definition=definition,
+            example_sentence=example_sentence,
+            category=category,
+            points_value=10,
+            is_word_of_day=is_word_of_day
+        )
+
+        db.session.add(new_word)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': f'"{new_word.word}" added successfully',
+            'word': {
+                'word_id': new_word.word_id,
+                'word': new_word.word,
+                'definition': new_word.definition,
+                'example_sentence': new_word.example_sentence,
+                'category': new_word.category,
+                'points_value': new_word.points_value,
+                'is_word_of_day': new_word.is_word_of_day
+            }
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/admin/wotd/api/update/<int:word_id>', methods=['PUT'])
+@admin_required
+def update_wotd_word(word_id):
+    try:
+        word = Vocabulary.query.get(word_id)
+
+        if not word:
+            return jsonify({
+                'success': False,
+                'error': 'Word not found'
+            }), 404
+
+        data = request.get_json()
+
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'No data provided'
+            }), 400
+
+        new_word_text = (data.get('word') or '').strip().lower()
+        definition = (data.get('definition') or '').strip()
+        example_sentence = (data.get('example_sentence') or '').strip()
+        category = (data.get('category') or '').strip().lower()
+        is_word_of_day = bool(data.get('is_word_of_day', word.is_word_of_day))
+
+        allowed_categories = ['noun', 'adjective', 'verb']
+
+        if not new_word_text:
+            return jsonify({
+                'success': False,
+                'error': 'Word is required'
+            }), 400
+
+        if not definition:
+            return jsonify({
+                'success': False,
+                'error': 'Definition is required'
+            }), 400
+
+        if not example_sentence:
+            return jsonify({
+                'success': False,
+                'error': 'Example sentence is required'
+            }), 400
+
+        if category not in allowed_categories:
+            return jsonify({
+                'success': False,
+                'error': 'Category must be noun, adjective, or verb'
+            }), 400
+
+        duplicate_word = Vocabulary.query.filter(
+            func.lower(Vocabulary.word) == new_word_text,
+            Vocabulary.word_id != word_id
+        ).first()
+
+        if duplicate_word:
+            return jsonify({
+                'success': False,
+                'error': 'Duplicate word is not allowed'
+            }), 400
+
+        word.word = new_word_text
+        word.definition = definition
+        word.example_sentence = example_sentence
+        word.category = category
+        word.is_word_of_day = is_word_of_day
+
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': f'"{word.word}" updated successfully',
+            'word': {
+                'word_id': word.word_id,
+                'word': word.word,
+                'definition': word.definition,
+                'example_sentence': word.example_sentence,
+                'category': word.category,
+                'points_value': word.points_value,
+                'is_word_of_day': word.is_word_of_day
+            }
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/admin/wotd/api/delete/<int:word_id>', methods=['DELETE'])
+@admin_required
+def delete_wotd_word(word_id):
+    try:
+        word = Vocabulary.query.get(word_id)
+
+        if not word:
+            return jsonify({
+                'success': False,
+                'error': 'Word not found'
+            }), 404
+
+        word_text = word.word
+
+        # Delete related user-word entries first to avoid FK issues
+        UserWords.query.filter_by(word_id=word_id).delete()
+
+        db.session.delete(word)
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': f'"{word_text}" deleted successfully'
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/admin/wotd/api/dictionary_lookup')
+@admin_required
+def dictionary_lookup():
+    word = request.args.get('word', '').strip()
+
+    if not word:
+        return jsonify({
+            'success': False,
+            'error': 'Word is required'
+        }), 400
+
+    try:
+        url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
+        response = requests.get(url, timeout=5)
+
+        if not response.ok:
+            return jsonify({
+                'success': False,
+                'error': 'No dictionary result found'
+            }), 404
+
+        data = response.json()
+
+        if not isinstance(data, list) or not data:
+            return jsonify({
+                'success': False,
+                'error': 'No dictionary result found'
+            }), 404
+
+        entry = data[0]
+        meanings = entry.get('meanings', [])
+
+        found_definition = ''
+        found_example = ''
+        found_category = ''
+
+        for meaning in meanings:
+            part_of_speech = (meaning.get('partOfSpeech') or '').strip().lower()
+
+            if part_of_speech in ['noun', 'adjective', 'verb'] and not found_category:
+                found_category = part_of_speech
+
+            definitions = meaning.get('definitions', [])
+            if definitions:
+                if not found_definition and definitions[0].get('definition'):
+                    found_definition = definitions[0].get('definition', '').strip()
+
+                if not found_example:
+                    for definition_item in definitions:
+                        example = definition_item.get('example')
+                        if example:
+                            found_example = example.strip()
+                            break
+
+            if found_definition and found_example and found_category:
+                break
+
+        return jsonify({
+            'success': True,
+            'word': word.lower(),
+            'definition': found_definition,
+            'example_sentence': found_example,
+            'category': found_category if found_category in ['noun', 'adjective', 'verb'] else ''
+        })
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Dictionary lookup failed: {str(e)}'
+        }), 500
 
 if __name__ == '__main__':
     with app.app_context():
