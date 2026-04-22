@@ -17,7 +17,7 @@
     {% endblock %}
     {% block header %}
     <div class="header-actions">
-        <button class="logout-btn" onclick="confirmLogout()">Logout</button>
+        <button class="logout-btn" onclick="showLogoutConfirm()">Logout</button>
     </div>
     {% endblock %}
 
@@ -56,7 +56,7 @@
     <div class="dashboard-container">
         <!-- Welcome Section -->
         <div class="welcome-section">
-            <h1>Hello, Trainer {{ current_user.name }}!</h1>
+            <h1>Hello, Trainer {{ current_user.name[0].upper() + current_user.name[1:] }}!</h1>
         </div>
 
 
@@ -117,7 +117,7 @@
                     </div>
                     <div class="progress-stat">
                         <span class="label">Current Streak</span>
-                        <span class="value">{{ streak }} Days</span>
+                        <span class="value">{{ streak }} Day/s</span>
                     </div>
                     <button class="btn-secondary" onclick="window.location.href='/progress'">VIEW DETAILED PROGRESS</button>
                 </div>
@@ -181,13 +181,13 @@
     </div>
     {% endif %}
 
-    <div class="modal" id="logoutModal">
-        <div class="modal-content">
+    <div class="admin-modal-overlay" id="logoutModal">
+        <div class="admin-modal-box">
             <h2>Confirm Logout</h2>
             <p>Are you sure you want to logout?</p>
-            <div class="modal-actions">
-                <button class="btn-confirm1" onclick="performLogout()">Yes, Logout</button>
-                <button class="btn-cancel1" onclick="closeLogoutModal()">Cancel</button>
+            <div class="admin-modal-actions">
+                <button class="admin-modal-confirm-btn" onclick="performLogout()">Yes, Logout</button>
+                <button class="admin-modal-cancel-btn" onclick="closeLogoutModal()">Cancel</button>
             </div>
         </div>
     </div>
@@ -620,10 +620,10 @@
             });
         }
 
-        function confirmLogout() {
-            const modal = document.getElementById("logoutModal");
-            if (modal) {
-                modal.classList.add("active");
+        function showLogoutConfirm() {
+            const logoutModal = document.getElementById("logoutModal");
+            if (logoutModal) {
+                logoutModal.classList.add("active");
             }
         }
 

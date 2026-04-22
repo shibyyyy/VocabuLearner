@@ -14,8 +14,8 @@
             </a>
     {% endblock %}
     {% block header %}
-    <div class="header-actions">
-        <button class="logout-btn" onclick="confirmLogout()">Logout</button>
+    <div class="admin-header-actions">
+        <button class="admin-logout-btn" onclick="showLogoutConfirm()">Logout</button>
     </div>
     {% endblock %}
    
@@ -283,41 +283,40 @@
     </div>
 
     <!-- Pokémon Collection Modal -->
-    <div id="pokemonCollectionModal" class="modal">
-        <div class="modal-content" style="max-width: 90%; max-height: 90%;">
-            <div class="modal-header">
+    <div id="pokemonCollectionModal" class="profile-pokemon-modal">
+        <div class="profile-pokemon-modal-box">
+            <div class="profile-pokemon-modal-header">
                 <h2 style="margin: 0; display: flex; align-items: center; gap: 10px;">
                     <span>🔮</span>
                     <span>MY POKÉMON COLLECTION</span>
                 </h2>
-                <span class="modal-close" onclick="closePokemonCollection()">&times;</span>
+                <span class="profile-pokemon-modal-close" onclick="closePokemonCollection()">&times;</span>
             </div>
             
-            <div class="modal-body">
+            <div class="profile-pokemon-modal-body">
                 <div class="collection-stats">
-                    <div class="collection-stat">
-                        <span class="stat-number" id="modalPokemonCount">{{ collected_pokemon_count }}</span>
-                        <span class="stat-label">Total Collected</span>
+                    <div class="profile-collection-stat">
+                        <span class="profile-collection-stat-number" id="modalPokemonCount">{{ collected_pokemon_count }}</span>
+                        <span class="profile-collection-stat-label">Total Collected</span>
                     </div>
-                    <div class="collection-stat">
-                        <span class="stat-number" id="modalUniqueCount">{{ unique_pokemon_count }}</span>
-                        <span class="stat-label">Unique Species</span>
+                    <div class="profile-collection-stat">
+                        <span class="profile-collection-stat-number" id="modalUniqueCount">{{ unique_pokemon_count }}</span>
+                        <span class="profile-collection-stat-label">Unique Species</span>
                     </div>
-                    <div class="collection-stat">
-                        <span class="stat-number">{{ current_partner_name }}</span>
-                        <span class="stat-label">Current Partner</span>
+                    <div class="profile-collection-stat">
+                        <span class="profile-collection-stat-number">{{ current_partner_name }}</span>
+                        <span class="profile-collection-stat-label">Current Partner</span>
                     </div>
                 </div>
                 
                 <div class="collection-filters">
-                    <button class="filter-btn active" onclick="filterCollection('all')">All Pokémon</button>
-                    <button class="filter-btn" onclick="filterCollection('common')">Common</button>
-                    <button class="filter-btn" onclick="filterCollection('rare')">Rare</button>
-                    <button class="filter-btn" onclick="filterCollection('legendary')">Legendary</button>
+                    <button class="profile-collection-filter-btn active" onclick="filterCollection('all')">All Pokémon</button>
+                    <button class="profile-collection-filter-btn" onclick="filterCollection('common')">Common</button>
+                    <button class="profile-collection-filter-btn" onclick="filterCollection('rare')">Rare</button>
+                    <button class="profile-collection-filter-btn" onclick="filterCollection('legendary')">Legendary</button>
                 </div>
                 
                 <div id="pokemonCollectionGrid" class="pokemon-collection-grid">
-                    <!-- Pokemon will be loaded here -->
                 </div>
                 
                 <div class="collection-empty" id="emptyCollectionMessage" style="display: none;">
@@ -332,13 +331,13 @@
         </div>
     </div>
 
-    <div class="modal" id="logoutModal">
-        <div class="modal-content">
+    <div class="admin-modal-overlay" id="logoutModal">
+        <div class="admin-modal-box">
             <h2>Confirm Logout</h2>
             <p>Are you sure you want to logout?</p>
-            <div class="modal-actions">
-                <button class="btn-confirm1" onclick="performLogout()">Yes, Logout</button>
-                <button class="btn-cancel1" onclick="closeLogoutModal()">Cancel</button>
+            <div class="admin-modal-actions">
+                <button class="admin-modal-confirm-btn" onclick="performLogout()">Yes, Logout</button>
+                <button class="admin-modal-cancel-btn" onclick="closeModal('logoutModal')">Cancel</button>
             </div>
         </div>
     </div>
@@ -1048,9 +1047,20 @@
             let filteredPokemon = allPokemonData;
             if (filter !== 'all') {
                 filteredPokemon = allPokemonData.filter(pokemon => {
-                    if (filter === 'common') return pokemon.rarity === 'common';
-                    if (filter === 'rare') return pokemon.rarity === 'rare';
-                    if (filter === 'legendary') return pokemon.rarity === 'legendary';
+                    const rarity = (pokemon.rarity || '').toLowerCase();
+
+                    if (filter === 'common') {
+                        return rarity === 'common' || rarity === 'starter';
+                    }
+
+                    if (filter === 'rare') {
+                        return rarity === 'rare' || rarity === 'achievement';
+                    }
+
+                    if (filter === 'legendary') {
+                        return rarity === 'legendary';
+                    }
+
                     return true;
                 });
             }
@@ -1954,24 +1964,19 @@
             avatarDiv.innerHTML = '<div class="avatar-icon">👤</div>';
         }
 
-        function confirmLogout() {
-            const modal = document.getElementById("logoutModal");
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
             if (modal) {
-                modal.classList.add("active");
+                modal.classList.remove('active');
             }
         }
 
-        function closeLogoutModal() {
-            const modal = document.getElementById("logoutModal");
-            if (modal) {
-                modal.classList.remove("active");
-            }
+        function showLogoutConfirm() {
+            document.getElementById('logoutModal').classList.add('active');
         }
 
         function performLogout() {
-            localStorage.clear();
-            sessionStorage.clear();
-            window.location.href = "/logout";
+            navigateTo('{{ url_for('logout') }}');
         }
     </script>
 {%endblock%}

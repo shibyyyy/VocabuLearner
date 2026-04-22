@@ -13,12 +13,28 @@
             VocabuLearner
         </a>
     {% endblock %}
+    {%block header%}
+        <div class="admin-header-actions">
+            <button class="admin-logout-btn" onclick="showLogoutConfirm()">Logout</button>
+        </div>
+    {%endblock%}
    
     <!-- SIMPLIFIED: Back Button at the top without extra wrapper -->
     <div style="width: 100%; max-width: 1200px; margin: 20px auto; padding: 0 20px; box-sizing: border-box;">
         <a href="{{ url_for('dashboard') }}" style="display: inline-block; padding: 10px 20px; background-color: #f0f0f0; color: #333; text-decoration: none; border-radius: 8px; font-weight: 500; transition: all 0.3s ease; border: 1px solid #ddd;">
             
         </a>
+    </div>
+
+    <div class="admin-modal-overlay" id="logoutModal">
+        <div class="admin-modal-box">
+            <h2>Confirm Logout</h2>
+            <p>Are you sure you want to logout?</p>
+            <div class="admin-modal-actions">
+                <button class="admin-modal-confirm-btn" onclick="performLogout()">Yes, Logout</button>
+                <button class="admin-modal-cancel-btn" onclick="closeLogoutModal()">Cancel</button>
+            </div>
+        </div>
     </div>
 
     <div class="leaderboard-container">
@@ -225,5 +241,24 @@
             item.style.cursor = 'pointer';
         });
     });
+
+    function showLogoutConfirm() {
+            const logoutModal = document.getElementById('logoutModal');
+            if (logoutModal) {
+                logoutModal.classList.add('active');
+            }
+        }
+
+        function closeLogoutModal() {
+            const logoutModal = document.getElementById('logoutModal');
+            if (logoutModal) {
+                logoutModal.classList.remove('active');
+            }
+        }
+
+        function performLogout() {
+            window.location.href = "{{ url_for('logout') }}";
+        }
+        
     </script>
 {% endblock %}

@@ -15,7 +15,22 @@
             VocabuLearner
         </a>
     {% endblock %}
-    {% block header %}{% endblock %}
+    {%block header%}
+        <div class="admin-header-actions">
+            <button class="admin-logout-btn" onclick="showLogoutConfirm()">Logout</button>
+        </div>
+    {%endblock%}
+
+    <div class="admin-modal-overlay" id="logoutModal">
+        <div class="admin-modal-box">
+            <h2>Confirm Logout</h2>
+            <p>Are you sure you want to logout?</p>
+            <div class="admin-modal-actions">
+                <button class="admin-modal-confirm-btn" onclick="performLogout()">Yes, Logout</button>
+                <button class="admin-modal-cancel-btn" onclick="closeLogoutModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Page Container -->
     <div class="page-wrapper">
@@ -388,5 +403,23 @@
             // Initialize with weekly view
             updateChart('weekly');
         });
+        
+        function showLogoutConfirm() {
+            const logoutModal = document.getElementById('logoutModal');
+            if (logoutModal) {
+                logoutModal.classList.add('active');
+            }
+        }
+
+        function closeLogoutModal() {
+            const logoutModal = document.getElementById('logoutModal');
+            if (logoutModal) {
+                logoutModal.classList.remove('active');
+            }
+        }
+
+        function performLogout() {
+            window.location.href = "{{ url_for('logout') }}";
+        }
     </script>
 {% endblock %}

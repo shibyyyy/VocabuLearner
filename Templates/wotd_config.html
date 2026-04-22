@@ -713,13 +713,13 @@
     </div>
 </div>
 
-<div class="modal" id="logoutModal">
-    <div class="modal-content">
+<div class="admin-modal-overlay" id="logoutModal">
+    <div class="admin-modal-box">
         <h2>Confirm Logout</h2>
         <p>Are you sure you want to logout?</p>
-        <div class="modal-actions">
-            <button class="btn-confirm1" onclick="performLogout()">Yes, Logout</button>
-            <button class="btn-cancel1" onclick="closeModal('logoutModal')">Cancel</button>
+        <div class="admin-modal-actions">
+            <button class="admin-modal-confirm-btn" onclick="performLogout()">Yes, Logout</button>
+            <button class="admin-modal-cancel-btn" onclick="closeLogoutModal()">Cancel</button>
         </div>
     </div>
 </div>
@@ -738,6 +738,13 @@
         window.location.href = "{{ url_for('admin_dashboard') }}";
     }
 
+    function closeLogoutModal() {
+        const logoutModal = document.getElementById('logoutModal');
+        if (logoutModal) {
+            logoutModal.classList.remove('active');
+        }
+    }
+
     function showLogoutConfirm() {
         document.getElementById('logoutModal').classList.add('active');
     }
@@ -745,7 +752,7 @@
     function performLogout() {
         window.location.href = "{{ url_for('logout') }}";
     }
-
+    
     function showModal(modalId) {
         document.getElementById(modalId).classList.add('active');
     }
