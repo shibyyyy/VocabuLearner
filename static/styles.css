@@ -1281,7 +1281,7 @@ body::after {
  /* Notification Container */
 .notification-container {
     position: fixed;
-    top: 11 0px; /* Positioned below the buttons */
+    top: 110px; /* Positioned below the buttons */
     right: 20px;
     z-index: 1000;
 }
@@ -2364,8 +2364,8 @@ body::after {
 .welcome-section h1 { font-size: 28px; color: var(--gold-accent); text-shadow: 3px 3px 0 var(--border-color); margin-bottom: 5px; }
 .welcome-stats { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin-top: 20px; }
 .stat-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.stat-item .label { font-size: 10px; color: var(--text-primary); text-shadow: 2px 2px 0 var(--border-color); }
-.stat-item .value { font-size: 18px; color: var(--gold-accent); text-shadow: 3px 3px 0 var(--border-color); }
+.stat-item .label { font-size: 16px; color: var(--text-primary); margin-top: 10px; font-weight:bold; text-shadow: 1px 1px 0 var(--border-color); }
+.stat-item .value { font-size: 18px; color: var(--gold-accent); font-weight:bold; text-shadow: 2px 2px 0 var(--border-color); margin:0; }
 .fire-icon { display: inline-block; animation: flicker 1.5s infinite; }
 @keyframes flicker { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.1); } }
 
@@ -2401,9 +2401,9 @@ body::after {
     border-color: var(--gold-accent);
 }
 .activity-card h3 {
-    font-size: 16px;
+    font-size: 18px;
     color: var(--gold-accent);
-    text-shadow: 3px 3px 0 var(--border-color);
+    text-shadow: 2px 2px 0 var(--border-color);
     margin-bottom: 15px;
 }
 .activity-card .icon {
@@ -2412,9 +2412,9 @@ body::after {
     display: block;
 }
 .activity-card .description {
-    font-size: 10px;
+    font-size: 14px;
     color: var(--text-primary);
-    text-shadow: 2px 2px 0 var(--border-color);
+    text-shadow: 1px 1px 0 var(--border-color);
     margin-top: 10px;
 }
 
@@ -2936,6 +2936,8 @@ body::after {
     margin-top: 10px;
     padding-top: 10px;
     border-top: 2px solid var(--border-color);
+    gap:15px;
+    padding: 20px 20px 40px 50px;
 }
 
 .day-label {
@@ -2997,8 +2999,8 @@ body::after {
 }
 
 .container {
-    margin-top: 160px;
-    max-width: 600px;
+    margin-top: 20px;
+    max-width: 1200px;
     background: var(--card-bg-light);
     border: 4px solid var(--border-color);
     backdrop-filter: blur(10px);
@@ -3016,8 +3018,8 @@ body::after {
 }
 
 .container p {
-    font-size: 12px;
-    margin-bottom: 30px;
+    font-size: 15px;
+    margin-bottom: 8px;
     text-shadow: 2px 2px 0 var(--border-color);
     line-height: 1.5;
 }
@@ -3031,7 +3033,7 @@ body::after {
 
 .word-form input, .word-form textarea {
     padding: 15px;
-    font-size: 12px;
+    font-size: 15px;
     font-family: 'Press Start 2P', monospace;
     border: 4px solid var(--border-color);
     outline: none;
@@ -3116,8 +3118,8 @@ body::after {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
     background: rgba(255,255,255,0.05);
     border: 2px solid var(--border-color);
     border-radius: 8px;
@@ -3125,8 +3127,8 @@ body::after {
 }
 
 .pokemon-sprite-large {
-    width: 90px;
-    height: 90px;
+    width: 180px;
+    height: 180px;
     image-rendering: pixelated;
     filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
     transition: all 0.3s ease;
@@ -3144,7 +3146,7 @@ body::after {
 }
 
 .pokemon-name-large {
-    font-size: 14px;
+    font-size: 18px;
     font-weight: bold;
     color: var(--gold-accent);
     text-shadow: 2px 2px 0 var(--border-color);
@@ -3194,7 +3196,7 @@ body::after {
 }
 
 .stat-value {
-    font-size: 12px;
+    font-size: 20px;
     font-weight: bold;
     color: #fff;
     text-shadow: 1px 1px 0 var(--border-color);
@@ -3213,7 +3215,7 @@ body::after {
 
 .stat-separator {
     color: var(--gold-accent);
-    font-size: 12px;
+    font-size: 20px;
     font-weight: bold;
     margin: 0 3px;
     flex-shrink: 0;
@@ -3236,7 +3238,7 @@ body::after {
 }
 
 .progress-title {
-    font-size: 12px;
+    font-size: 18px;
     color: var(--gold-accent);
     text-shadow: 1px 1px 0 var(--border-color);
     margin: 0;
@@ -3244,7 +3246,7 @@ body::after {
 }
 
 .progress-count {
-    font-size: 11px;
+    font-size: 18px;
     color: #fff;
     background: linear-gradient(135deg, var(--button-primary), #ff8800);
     padding: 4px 10px;
@@ -3399,13 +3401,13 @@ body::after {
     }
     
     .pokemon-image-container {
-        width: 100px;
-        height: 100px;
+        width: 200px;
+        height: 200px;
     }
     
     .pokemon-sprite-large {
-        width: 80px;
-        height: 80px;
+        width: 200px;
+        height: 200px;
     }
     
     .pokemon-name-large {
@@ -3467,13 +3469,13 @@ body::after {
     }
     
     .pokemon-image-container {
-        width: 90px;
-        height: 90px;
+        width: 180px;
+        height: 180px;
     }
     
     .pokemon-sprite-large {
-        width: 70px;
-        height: 70px;
+        width: 160px;
+        height: 160px;
     }
     
     .stats-row {
@@ -3728,26 +3730,45 @@ body::after {
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--button-primary), var(--gold-accent), var(--green-accent));
     width: 0%;
-    transition: width 0.5s;
     position: relative;
+    overflow: hidden;
+    transition: width 0.5s ease;
+    background: linear-gradient(
+        90deg,
+        #ff5a36 0%,
+        #ffb000 55%,
+        #ffe34d 100%
+    );
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.25);
+    filter: saturate(1.2) brightness(1.05);
 }
 
 .progress-fill::after {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-    animation: shimmer 2s infinite;
+    inset: 0;
+
+    background: linear-gradient(
+        90deg,
+        rgba(255,255,255,0.00) 0%,
+        rgba(255,255,255,0.25) 30%,
+        rgba(255,255,255,0.45) 50%,
+        rgba(255,255,255,0.25) 70%,
+        rgba(255,255,255,0.00) 100%
+    );
+
+    animation: xpGlowPulse 1s ease-in-out infinite;
+    pointer-events: none;
 }
 
-@keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+@keyframes xpGlowPulse {
+    0%, 100% {
+        opacity: 0.55;
+    }
+    50% {
+        opacity: 1;
+    }
 }
 
 .flashcard-area {
@@ -5590,7 +5611,7 @@ body::after {
 }
 
 .stat-label {
-    font-size: 10px;
+    font-size: 20px;
     color: var(--text-primary);
     text-shadow: 1px 1px 0 var(--border-color);
     text-transform: uppercase;
@@ -6144,7 +6165,7 @@ body::after {
 }
 
 .podium .label {
-    font-size: 9px;
+    font-size: 13px;
     color: var(--text-primary);
     text-shadow: 1px 1px 0 var(--border-color);
     font-weight: 600;
@@ -6181,7 +6202,7 @@ body::after {
     text-shadow: 2px 2px 0 var(--border-color);
     font-weight: 700;
     background: rgba(0, 0, 0, 0.3);
-    padding: 5px 12px;
+    padding: 7px 12px;
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
@@ -6211,7 +6232,7 @@ body::after {
 
 /* Make word count more visible */
 .item-words { 
-    font-size: 9px;
+    font-size: 12px;
     color: #4fc3f7;
     text-shadow: 1px 1px 0 var(--border-color);
     font-weight: 600;
@@ -6222,22 +6243,25 @@ body::after {
 }
 
 .user-rank-info {
-    background: #f0f9ff;
-    padding: 10px 15px;
-    border-radius: 8px;
+    background: rgba(0,0,0,0.2);
+    padding: 10px 15px; /* KEEP your spacing */
     margin-top: 15px;
-    border: 2px solid #4CAF50;
-    font-size: 16px;
-    color: #000;
-    text-shadow: none;
-    font-weight: 600;
+
+    border: 2px solid var(--border-color);
+
+    font-size: 16px; /* KEEP your size */
+    font-family: 'Press Start 2P', monospace;
+
+    color: var(--text-primary);
+    text-shadow: 1px 1px 0 var(--border-color);
+
+    text-align: center;
 }
 
-/* Make user rank info numbers stand out more */
 .user-rank-info strong {
-    color: #ff5722;
-    font-weight: 800;
-    text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+    color: var(--gold-accent);
+    transform: scale(1.05);
+    display: inline-block;
 }
 
 /* Modal background */
@@ -6649,17 +6673,17 @@ body::after {
             background: #ff3333;
         }
         .profile-pokemon-modal {
-    display: none;
-    position: fixed;
-    z-index: 10000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.9);
-    overflow: auto;
-    backdrop-filter: blur(5px);
-}
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(7, 15, 36, 0.6);
+            overflow: auto;
+            backdrop-filter: blur(5px);
+        }
 
 @keyframes modalSlideIn {
     from {
@@ -6673,10 +6697,27 @@ body::after {
 }
 
 .profile-pokemon-modal-box {
-    max-width: 90%;
-    max-height: 90%;
-    margin: 40px auto;
-    animation: modalSlideIn 0.3s ease;
+    width: 1200px;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    background: #1a2c4f;
+    border: 4px solid #000;
+
+    /* 👇 pixel shadow */
+    box-shadow: 8px 8px 0 #000;
+
+    /* 👇 removes smooth edges */
+    border-radius: 0;
+
+    /* 👇 crisp rendering */
+    image-rendering: pixelated;
 }
 
 .profile-pokemon-modal-header {
@@ -6742,7 +6783,7 @@ body::after {
 }
 
 .profile-collection-stat-label {
-    font-size: 10px;
+    font-size: 12px;
     color: #fff;
     opacity: 0.8;
     text-transform: uppercase;

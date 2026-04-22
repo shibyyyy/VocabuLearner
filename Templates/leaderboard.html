@@ -4,7 +4,8 @@
 
 {% block content %}
     {% block logo_link %}
-        <a href="{{ url_for('dashboard') }}" class="logo-link">
+    
+        <a href="{{ url_for('dashboard') }}" class="logo-link"> 
             <div class="logo-icon">
                 <div class="pokeball-mini"></div>
                 <div class="pokeball-mini"></div>
@@ -13,18 +14,13 @@
             VocabuLearner
         </a>
     {% endblock %}
+    
     {%block header%}
         <div class="admin-header-actions">
             <button class="admin-logout-btn" onclick="showLogoutConfirm()">Logout</button>
         </div>
-    {%endblock%}
-   
-    <!-- SIMPLIFIED: Back Button at the top without extra wrapper -->
-    <div style="width: 100%; max-width: 1200px; margin: 20px auto; padding: 0 20px; box-sizing: border-box;">
-        <a href="{{ url_for('dashboard') }}" style="display: inline-block; padding: 10px 20px; background-color: #f0f0f0; color: #333; text-decoration: none; border-radius: 8px; font-weight: 500; transition: all 0.3s ease; border: 1px solid #ddd;">
-            
-        </a>
-    </div>
+    {%endblock%} 
+        
 
     <div class="admin-modal-overlay" id="logoutModal">
         <div class="admin-modal-box">
@@ -36,12 +32,16 @@
             </div>
         </div>
     </div>
+    
+
 
     <div class="leaderboard-container">
         <div style="width: 100%; max-width: 1200px; margin: 20px auto; padding: 0 20px; box-sizing: border-box;">
-            <a href="{{ url_for('dashboard') }}" style="display: inline-block; padding: 10px 20px; background-color: #f0f0f0; color: #333; text-decoration: none; border-radius: 8px; font-weight: 500; transition: all 0.3s ease; border: 1px solid #ddd;">
-                ← Back to Dashboard
-            </a>
+           <div class="back-button-container">
+    <a href="{{ url_for('dashboard') }}" class="back-button">
+        ← Back to Dashboard
+    </a>
+</div>
         </div>
         <div class="page-title">
             <h1>Leaderboard</h1>
@@ -179,7 +179,7 @@
                         </div>
                         <div class="item-right">
                             <div class="item-score">{{ entry.score }}</div>
-                            <div class="item-words">{{ entry.words }} words</div>
+                            <div class="item-words">{{ entry.words }} word/s</div>
                         </div>
                     </div>
                 {% endfor %}
@@ -198,6 +198,42 @@
     <style>
         /* All other CSS remains EXACTLY the same */
         /* Leaderboard container adjustments */
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            background: #4169e1;
+            color: #fff;
+            text-decoration: none;
+            border: 3px solid #000;
+            border-radius: 0;
+            cursor: pointer;
+            /* pixel shadow */
+            box-shadow: 4px 4px 0 #000;
+            transition: none;
+            margin-bottom: 10px;
+            margin-top: 70px;
+        }
+
+        .back-button:hover {
+            background: #3159d1;
+
+            /* pressed effect */
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #000;
+        }
+
+        .back-button:active {
+            transform: translate(4px, 4px);
+            box-shadow: 0px 0px 0 #000;
+        }
+
+
+
         .leaderboard-container {
             width: 100%;
             max-width: 1200px;

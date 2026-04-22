@@ -13,21 +13,23 @@
     VocabuLearner
     </a>
     {% endblock %}
+    
     {%block header%}
         <div class="admin-header-actions">
             <button class="admin-logout-btn" onclick="showLogoutConfirm()">Logout</button>
         </div>
     {%endblock%}
+    
     {{ form.hidden_tag() }}
 
     <!-- WORD ENTRY FORM -->
-    <div class="container" id="wordEntry">
-        <!-- Back Button -->
-        <div class="back-button-container">
-            <a href="{{ url_for('dashboard') }}" class="back-button">
-                ← Back to Dashboard
-            </a>
-    </div>
+    <div class="back-button-container">
+    <a href="{{ url_for('dashboard') }}" class="back-button">
+        ← Back to Dashboard
+    </a>
+</div>
+
+<div class="container" id="wordEntry">
     <h1>Add Your Words</h1>
    
     <!-- Flash messages display -->
@@ -185,31 +187,43 @@
 
 <style>
 /* Back Button Styles - Same as other pages */
-.back-button-container {
-    margin-bottom: 20px;
-}
-
 .back-button {
-    display: inline-flex;
-    align-items: center;
-    padding: 10px 20px;
-    background-color: #f0f0f0;
-    color: #333;
-    text-decoration: none;
-    border-radius: 8px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    border: 1px solid #ddd;
-}
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            background: #4169e1;
+            color: #fff;
+            text-decoration: none;
+            border: 3px solid #000;
+            border-radius: 0;
+            cursor: pointer;
+            /* pixel shadow */
+            box-shadow: 4px 4px 0 #000;
+            transition: none;
+            margin-bottom: 10px;
+        }
 
-.back-button:hover {
-    background-color: #e0e0e0;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
+        .back-button:hover {
+            background: #3159d1;
 
-.back-button:active {
-    transform: translateY(0);
+            /* pressed effect */
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #000;
+        }
+
+        .back-button:active {
+            transform: translate(4px, 4px);
+            box-shadow: 0px 0px 0 #000;
+        }
+
+       .back-button-container {
+    max-width: 1200px;          /* SAME as .container */
+    margin: 100px auto 0px auto;  /* centers it horizontally */
+    padding: 0 20px;           /* SAME as .container padding */
+    box-sizing: border-box;
 }
 
 /* Form Error Styles */
