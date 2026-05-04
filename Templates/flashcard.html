@@ -113,33 +113,48 @@
     </div>
 
     <!-- EXP Popup Modal -->
-    <div class="modal exp-modal" id="expPopup">
-        <div class="modal-content">
-            <div class="exp-popup-content">
-                <div class="exp-icon">✨</div>
-                <h2>EXP Earned!</h2>
-                <div class="exp-amount" id="expAmount">+0 EXP</div>
-                <p class="exp-message">Your vocabulary knowledge has been rewarded!</p>
-                <div class="exp-details">
-                    <div class="exp-detail">
-                        <span class="label">Correct Answers:</span>
-                        <span class="value" id="popupScore">0</span>
-                    </div>
-                    <div class="exp-detail">
-                        <span class="label">Accuracy:</span>
-                        <span class="value" id="popupAccuracy">0%</span>
-                    </div>
-                    <div class="exp-detail">
-                        <span class="label">Time:</span>
-                        <span class="value" id="popupTime">0s</span>
-                    </div>
-                </div>
-                <button class="btn-confirm" id="btn-close-popup">Awesome! Continue</button>
-                <!-- Also add Back button in EXP popup -->
-                <button class="btn-confirm back-to-review-popup" onclick="window.location.href='/review'" style="background: #666; margin-top: 10px;">Back to Review Menu</button>
+    <!-- EXP Popup Modal -->
+<div class="modal exp-modal" id="expPopup">
+    <div class="exp-popup-content">
+        <div class="exp-icon">✨</div>
+
+        <h2>EXP Earned!</h2>
+
+        <div class="exp-amount" id="expAmount">+0 EXP</div>
+
+        <p class="exp-message">
+            Your vocabulary knowledge has been rewarded!
+        </p>
+
+        <div class="exp-details">
+            <div class="exp-detail">
+                <span class="label">Correct Answers:</span>
+                <span class="value" id="popupScore">0</span>
+            </div>
+
+            <div class="exp-detail">
+                <span class="label">Accuracy:</span>
+                <span class="value" id="popupAccuracy">0%</span>
+            </div>
+
+            <div class="exp-detail">
+                <span class="label">Time:</span>
+                <span class="value" id="popupTime">0s</span>
             </div>
         </div>
+
+        <div class="exp-actions">
+            <button class="btn-confirm" id="btn-close-popup">
+                Awesome! Continue
+            </button>
+
+            <button class="btn-confirm back-to-review-popup"
+                onclick="window.location.href='/review'">
+                Back to Review Menu
+            </button>
+        </div>
     </div>
+</div>
 
     <div class="admin-modal-overlay" id="logoutModal">
         <div class="admin-modal-box">
@@ -160,143 +175,180 @@
     <style>
         /* EXP Popup Styles */
         .exp-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
 
-        .exp-modal.active {
-            display: flex;
-        }
+.exp-modal.active {
+    display: flex;
+}
 
-        .exp-popup-content {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-            animation: popupSlide 0.5s ease;
-            border: 4px solid #4CAF50;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
+.exp-popup-content {
+    background: linear-gradient(135deg, #173b66, #102746);
+    color: #fff;
 
-        @keyframes popupSlide {
-            from {
-                transform: translateY(-50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
+    width: 760px;
+    max-width: 90vw;
+    min-height: auto;
 
-        .exp-icon {
-            font-size: 60px;
-            margin-bottom: 20px;
-            animation: pulse 2s infinite;
-        }
+    padding: 28px 34px;
+    border: 4px solid var(--border-color);
+    border-radius: 0;
+    box-shadow: 10px 10px 0 var(--border-color);
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
+    font-family: 'Press Start 2P', monospace;
+    text-align: center;
+}
 
-        .exp-amount {
-            font-size: 36px;
-            font-weight: bold;
-            color: #4CAF50;
-            margin: 20px 0;
-            text-shadow: 2px 2px 0 #ddd;
-        }
+.exp-popup-content h2 {
+    font-size: 22px;
+    color: #fff;
+    text-shadow: 3px 3px 0 var(--border-color);
+    margin-bottom: 24px;
+}
 
-        .exp-message {
-            color: #666;
-            margin-bottom: 25px;
-            font-size: 16px;
-        }
+.exp-icon {
+    font-size: 42px;
+    margin-bottom: 12px;
+}
 
-        .exp-details {
-            background: #f9f9f9;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            text-align: left;
-        }
+.exp-amount {
+    font-size: 28px;
+    color: var(--gold-accent);
+    text-shadow: 3px 3px 0 var(--border-color);
+    margin: 18px 0;
+}
 
-        .exp-detail {
-            display: flex;
-            justify-content: space-between;
-            margin: 8px 0;
-            padding: 5px 0;
-            border-bottom: 1px solid #eee;
-        }
+.exp-message {
+    font-size: 11px;
+    color: #dce7ff;
+    line-height: 1.8;
+    margin-bottom: 22px;
+}
 
-        .exp-detail:last-child {
-            border-bottom: none;
-        }
+.exp-details {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
 
-        .exp-detail .label {
-            color: #666;
-        }
+    background: transparent;
+    padding: 0;
+    margin: 24px 0;
+}
 
-        .exp-detail .value {
-            font-weight: bold;
-            color: #333;
-        }
+.exp-detail {
+    background: rgba(255,255,255,0.08);
+    border: 3px solid #4b7cff;
+    box-shadow: 4px 4px 0 var(--border-color);
 
-        .btn-confirm {
-            background: linear-gradient(135deg, #4CAF50, #45a049);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 18px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: bold;
-            width: 100%;
-            margin-top: 20px;
-        }
+    padding: 18px 12px;
+    text-align: center;
 
-        .btn-confirm:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
-        }
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.exp-detail .label {
+    font-size: 9px;
+    color: #cfd8ff;
+    text-transform: uppercase;
+}
+
+.exp-detail .value {
+    font-size: 18px;
+    color: var(--gold-accent);
+    text-shadow: 2px 2px 0 var(--border-color);
+}
+
+.btn-confirm {
+    width: auto;
+    min-width: 220px;
+
+    background: #4b7cff;
+    color: #fff;
+
+    border: 3px solid var(--border-color);
+    border-radius: 0;
+
+    padding: 14px 22px;
+    margin: 10px 8px 0;
+
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+
+    cursor: pointer;
+    box-shadow: 5px 5px 0 var(--border-color);
+    transition: all 0.2s;
+}
+
+.btn-confirm:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 3px 3px 0 var(--border-color);
+    background: #3159d1;
+}
+
+.back-to-review-popup {
+    background: #666;
+}
+
+.back-to-review-popup:hover {
+    background: #555;
+}
 
         /* Back Button Styles */
         .back-button-container {
             margin-bottom: 20px;
         }
 
+        /* BASE BACK BUTTON (Pokemon style) */
         .back-button {
-            background: #f5f5f5;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            color: #333;
-            transition: all 0.3s;
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
+
+            padding: 10px 16px;
+
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+
+            background: var(--button-secondary); /* blue */
+            color: #fff;
+            text-decoration: none;
+
+            border: 3px solid var(--border-color);
+            border-radius: 0;
+
+            cursor: pointer;
+
+            box-shadow: 4px 4px 0 var(--border-color);
+            transition: all 0.2s;
         }
 
+        /* HOVER (press effect) */
         .back-button:hover {
-            background: #e0e0e0;
-            transform: translateY(-2px);
+            background: #3159d1;
+
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 var(--border-color);
         }
 
+        /* CLICK */
+        .back-button:active {
+            transform: translate(4px, 4px);
+            box-shadow: 0 0 0 var(--border-color);
+        }
+
+
+        /* ===== VARIANTS ===== */
+
+        /* Back to review (gray version) */
         .back-to-review {
             background: #666;
         }
@@ -305,6 +357,7 @@
             background: #555;
         }
 
+        /* Popup version (same gray style) */
         .back-to-review-popup {
             background: #666;
         }
@@ -538,7 +591,7 @@
             accuracyDisplay.textContent = `${accuracy}%`;
             finalTimeDisplay.textContent = `${elapsedSeconds}s`;
             xpEarnedText.textContent = `+${totalExpEarned} XP Earned!`;
-            completionMessage.style.display = 'block';
+            completionMessage.style.display = 'none';
             
             // Update popup details
             popupScore.textContent = score;
@@ -623,7 +676,9 @@
         }
 
         function performLogout() {
-            window.location.href = "{{ url_for('logout') }}";
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = "/logout";
         }
         
     </script>

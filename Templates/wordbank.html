@@ -221,7 +221,9 @@ function closeWordModal() {
         }
 
         function performLogout() {
-            window.location.href = "{{ url_for('logout') }}";
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = "/logout";
         }
 
     </script>

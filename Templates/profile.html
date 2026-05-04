@@ -42,7 +42,7 @@
             <p class="profile-subtitle">Vocabulary Trainer since <span id="joinDate">{{ user.date_created.strftime('%B %Y') }}</span></p>
            
             <div class="profile-level-badge" id="levelBadge">
-                {{ user.total_points }} XP • Streak: {{ user.current_streak }} days
+                {{ user.total_points }} XP • Streak: {{ user.current_streak }} day/s
             </div>
         </div>
 
@@ -1343,7 +1343,7 @@
                         if (levelBadge) {
                             const streakMatch = levelBadge.textContent.match(/Streak: (\d+) days/);
                             const streak = streakMatch ? streakMatch[1] : '0';
-                            levelBadge.textContent = `${data.total_points} XP • Streak: ${streak} days`;
+                            levelBadge.textContent = `${data.total_points} XP • Streak: ${streak} day/s`;
                         }
                     }
                 })
@@ -1984,7 +1984,9 @@
         }
 
         function performLogout() {
-            navigateTo('{{ url_for('logout') }}');
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = "/logout";
         }
     </script>
 {%endblock%}

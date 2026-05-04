@@ -49,7 +49,7 @@
     --header-bg: #1e7b1e;
     --card-bg: rgba(40, 40, 40, 0.95);
     --card-bg-light: rgba(40, 40, 40, 0.15);
-    --border-color: #444444;
+    --border-color: #353535;
     --shadow-color: rgba(0, 0, 0, 0.5);
     --mountain-color: rgba(20, 60, 90, 0.4);
     
@@ -964,10 +964,10 @@ body::after {
     margin-bottom: 20px; 
 }
 .features-hero p { 
-    font-size: 12px; 
+    font-size: 13px; 
     line-height: 1.8; 
     color: var(--text-primary); 
-    text-shadow: 2px 2px 0 var(--border-color); 
+    text-shadow: 1px 1px 0 var(--border-color); 
     max-width: 800px;
     margin: 0 auto;
 }
@@ -999,8 +999,8 @@ body::after {
 }
 
 .feature-icon2 { 
-    width: 100px; 
-    height: 100px; 
+    width: 80px; 
+    height: 80px; 
     background: rgba(0,0,0,0.3);
     border: 4px solid var(--border-color);
     display: flex;
@@ -1008,6 +1008,7 @@ body::after {
     justify-content: center;
     font-size: 48px;
     box-shadow: 4px 4px 0 var(--border-color);
+    margin-bottom: 20px;
 }
 
 .feature-content2 h2 { 
@@ -1031,9 +1032,9 @@ body::after {
 }
 
 .feature-list li { 
-    font-size: 12px; 
+    font-size: 14px; 
     color: var(--text-primary); 
-    text-shadow: 2px 2px 0 var(--border-color); 
+    text-shadow: 1px 1px 0 var(--border-color); 
     margin-bottom: 10px; 
     padding-left: 20px;
     position: relative;
@@ -1053,7 +1054,7 @@ body::after {
     color: #fff;
     padding: 5px 10px;
     border: 2px solid var(--border-color);
-    font-size: 8px;
+    font-size: 12px;
     margin-top: 10px;
     box-shadow: 2px 2px 0 var(--border-color);
 }
@@ -2496,13 +2497,15 @@ body::after {
     background: rgba(255,215,0,0.9);
 }
 .flashcard-word {
-    font-size: 32px;
+    font-size: 40px;
+    font-weight: bold;
     color: var(--header-bg);
     text-shadow: 3px 3px 0 var(--border-color);
     margin-bottom: 15px;
 }
 .flashcard-type {
     font-size: 14px;
+    font-weight: bold;
     color: var(--button-secondary);
     text-shadow: 2px 2px 0 var(--border-color);
     margin-bottom: 20px;
@@ -3127,8 +3130,8 @@ body::after {
 }
 
 .pokemon-sprite-large {
-    width: 180px;
-    height: 180px;
+    width: 140px;
+    height: 140px;
     image-rendering: pixelated;
     filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
     transition: all 0.3s ease;
@@ -3406,8 +3409,8 @@ body::after {
     }
     
     .pokemon-sprite-large {
-        width: 200px;
-        height: 200px;
+        width: 100px;
+        height: 100px;
     }
     
     .pokemon-name-large {
@@ -3474,8 +3477,8 @@ body::after {
     }
     
     .pokemon-sprite-large {
-        width: 160px;
-        height: 160px;
+        width: 140px;
+        height: 140px;
     }
     
     .stats-row {
@@ -3659,6 +3662,7 @@ body::after {
 
 .challenge-title {
     font-size: 25px;
+    font-weight: bold;
     color: var(--gold-accent);
     text-shadow: 3px 3px 0 var(--border-color);
     display: flex;
@@ -3682,6 +3686,7 @@ body::after {
 .stat-badge .value {
     color: var(--gold-accent);
     font-size: 14px;
+    font-weight: bold;
     margin-top: 5px;
 }
 
@@ -3715,8 +3720,11 @@ body::after {
 .progress-info {
     display: flex;
     justify-content: space-between;
+    align-items: flex-end;
     margin-bottom: 5px;
-    font-size: 10px;
+    font-size: 14px;
+    font-family: 'Press Start 2P', monospace;
+    position: relative;
 }
 
 .progress-bar {
@@ -4019,10 +4027,27 @@ body::after {
 }
 
 .timer {
-    font-size: 14px;
+    font-size: 17px;
+    font-weight: bold;
     color: var(--gold-accent);
     text-shadow: 2px 2px 0 var(--border-color);
     margin: 10px 0;
+}
+
+#progress-percent {
+    font-family: 'Press Start 2P', monospace;
+    font-weight: bold;
+    font-size: 15px;
+
+    color: var(--gold-accent);
+
+    text-shadow: 
+        2px 2px 0 var(--border-color),
+        0 0 8px rgba(255, 215, 0, 0.4); /* soft glow */
+
+    padding: 1px 6px;
+
+    display: inline-block;
 }
 
  /* Header Actions */
@@ -4878,9 +4903,10 @@ body::after {
 /* Challenge Type Cards */
 .challenge-types {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(3, 1fr); /* force 3 columns */
     gap: 30px;
     margin-bottom: 60px;
+    align-items: stretch;
 }
 
 .challenge-type-card {
@@ -4893,7 +4919,6 @@ body::after {
     position: relative;
     overflow: hidden;
     box-shadow: 6px 6px 0 var(--border-color);
-    min-height: 400px;
     display: flex;
     flex-direction: column;
 }
@@ -4936,26 +4961,26 @@ body::after {
 
 .challenge-type-card h3 {
     font-size: 20px;
-    margin-bottom: 15px;
+    font-weight: bold;
+    margin-bottom: 12px;
     color: var(--gold-accent);
     text-shadow: 2px 2px 0 var(--border-color);
     letter-spacing: 1px;
 }
 
 .challenge-type-card p {
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1.8;
     color: var(--text-primary);
-    text-shadow: 2px 2px 0 var(--border-color);
+    text-shadow: 1px 1px 0 var(--border-color);
     letter-spacing: 0.5px;
-    margin-bottom: 20px;
+    margin-bottom: 5px;
 }
 
 /* Features List */
 .features-list {
-    margin-top: 20px;
+    margin-top: 15px;
     padding-left: 20px;
-    flex-grow: 1;
 }
 
 .feature-item {
@@ -4963,7 +4988,7 @@ body::after {
     align-items: flex-start;
     gap: 10px;
     margin-bottom: 15px;
-    font-size: 11px;
+    font-size: 14px;
     line-height: 1.6;
     color: var(--text-primary);
     text-shadow: 1px 1px 0 var(--border-color);
@@ -5022,7 +5047,7 @@ body::after {
 }
 
 .benefit-card p {
-    font-size: 11px;
+    font-size: 13px;
     color: var(--text-primary);
     line-height: 1.6;
     text-shadow: 1px 1px 0 var(--border-color);
@@ -5071,44 +5096,66 @@ body::after {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 20px;
+
     margin-bottom: 30px;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 20px;
+    padding: 25px;
+
+    background: var(--card-bg-light);
+    backdrop-filter: blur(10px);
+
     border: 4px solid var(--border-color);
-    box-shadow: 6px 6px 0 var(--border-color);
+    border-radius: 0;
+    box-shadow: 8px 8px 0 var(--border-color);
 }
 
 .quiz-title {
-    font-size: 24px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 25px;
+
     color: var(--gold-accent);
     text-shadow: 3px 3px 0 var(--border-color);
+
     letter-spacing: 1px;
+    font-weight: bold   ;
+    line-height: 1.4;
 }
 
 .quiz-stats {
     display: flex;
-    gap: 30px;
+    gap: 15px;
+    flex-wrap: wrap;
 }
 
 .stat-box {
+    min-width: 110px;
+    padding: 14px 16px;
+
     text-align: center;
-    padding: 10px 20px;
-    background: rgba(255, 255, 255, 0.1);
+
+    background: rgba(255, 255, 255, 0.15);
     border: 3px solid var(--border-color);
-    min-width: 100px;
+    border-radius: 0;
+    box-shadow: 1px 1px 0 var(--border-color);
 }
 
 .stat-value {
-    font-size: 24px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 22px;
+
     color: var(--gold-accent);
     text-shadow: 2px 2px 0 var(--border-color);
-    margin-bottom: 5px;
+
+    margin-bottom: 8px;
 }
 
 .stat-label {
-    font-size: 10px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+
     color: var(--text-primary);
     text-shadow: 1px 1px 0 var(--border-color);
+
     text-transform: uppercase;
     letter-spacing: 1px;
 }
@@ -5121,8 +5168,8 @@ body::after {
 .progress-label {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 10px;
-    font-size: 12px;
+    font-size: 13px;
+    font-weight: bold;
     color: var(--text-primary);
     text-shadow: 1px 1px 0 var(--border-color);
 }
@@ -5217,7 +5264,7 @@ body::after {
 }
 
 .timer-label {
-    font-size: 12px;
+    font-size: 15px;
     color: var(--gold-accent);
     text-shadow: 1px 1px 0 var(--border-color);
     margin-bottom: 10px;
@@ -5226,7 +5273,7 @@ body::after {
 }
 
 .timer-display {
-    font-size: 36px;
+    font-size: 30px;
     color: var(--button-primary);
     text-shadow: 3px 3px 0 var(--border-color);
     font-weight: bold;
@@ -5250,64 +5297,87 @@ body::after {
 .options-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+    gap: 16px;
     margin-bottom: 30px;
 }
 
 .option-btn {
-    background: rgba(255, 255, 255, 0.1);
-    border: 4px solid var(--border-color);
-    padding: 25px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    background: hsla(0, 0%, 100%, 0.003);
+    backdrop-filter: blur(6px);
+
+    border: 3px solid var(--border-color);
+    padding: 18px 16px;
+
     font-size: 14px;
-    color: var(--text-primary);
+    color: #ffffff; /* main text */
+
     cursor: pointer;
-    transition: all 0.1s;
-    box-shadow: 6px 6px 0 var(--border-color);
-    font-family: 'Press Start 2P', 'Courier New', monospace;
-    text-align: center;
-    line-height: 1.6;
+
+    box-shadow: 5px 5px 0 var(--border-color);
+    font-family: 'Press Start 2P', monospace;
+
+    text-align: left; /* ⭐ IMPORTANT */
+    line-height: 1.5;
+
     position: relative;
-    overflow: hidden;
+    transition: all 0.15s;
 }
 
 .option-btn:hover:not(.selected):not(.correct):not(.incorrect) {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--border-color);
     background: rgba(255, 255, 255, 0.2);
-    transform: translate(3px, 3px);
-    box-shadow: 3px 3px 0 var(--border-color);
 }
 
 .option-btn.selected {
     background: var(--gold-accent);
-    color: #000;
+    color: #000; /* better contrast on gold */
+    text-shadow: none;
+
     transform: translate(3px, 3px);
-    box-shadow: 3px 3px 0 var(--border-color);
+    box-shadow: 2px 2px 0 var(--border-color);
 }
 
 .option-btn.correct {
-    background: #4CAF50;
-    color: white;
+    background: rgba(76, 175, 80, 0.85);
+    color: #fff;
     border-color: #2E7D32;
 }
 
 .option-btn.incorrect {
-    background: #ff4444;
-    color: white;
+    background: rgba(255, 68, 68, 0.85);
+    color: #fff;
     border-color: #B71C1C;
 }
 
 .option-letter {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    width: 30px;
-    height: 30px;
-    background: var(--border-color);
-    color: var(--text-primary);
+    position: static;
+
+    width: 28px;
+    height: 28px;
+
+    flex-shrink: 0;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
-    border: 2px solid var(--gold-accent);
+
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+
+    color: #fff;
+
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.8);
+
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(4px);
+
+    border: 2px solid var(--border-color);
+    box-shadow: 2px 2px 0 var(--border-color);
 }
 
 /* Explanation Box */
@@ -5336,14 +5406,14 @@ body::after {
 }
 
 .explanation-title {
-    font-size: 14px;
+    font-size: 16px;
     color: #4CAF50;
     margin-bottom: 15px;
     text-shadow: 2px 2px 0 var(--border-color);
 }
 
 .explanation-text {
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1.8;
     color: var(--text-primary);
     text-shadow: 1px 1px 0 var(--border-color);
@@ -5402,14 +5472,15 @@ body::after {
 .streak-display {
     display: flex;
     align-items: center;
-    gap: 15px;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 15px 25px;
-    border: 3px solid var(--gold-accent);
+    gap: 3px;
+    padding: 9px 7px;
+    border: 2px solid var(--gold-accent);
+    position: absolute;
+    left: 30%;
 }
 
 .streak-icon {
-    font-size: 24px;
+    font-size: 22px;
 }
 
 .streak-info h3 {
@@ -5576,44 +5647,66 @@ body::after {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 20px;
+
     margin-bottom: 30px;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 20px 30px;
+    padding: 25px;
+
+    background: var(--card-bg-light);
+    backdrop-filter: blur(10px);
+
     border: 4px solid var(--border-color);
-    box-shadow: 6px 6px 0 var(--border-color);
+    border-radius: 0;
+    box-shadow: 8px 8px 0 var(--border-color);
 }
 
 .game-title {
-    font-size: 24px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 22px;
+
     color: var(--gold-accent);
-    text-shadow: 3px 3px 0 var(--border-color);
+    text-shadow: 2px 2px 0 var(--border-color);
+    font-weight: bold;
+
     letter-spacing: 1px;
+    line-height: 1.4;
 }
 
 .game-stats {
     display: flex;
-    gap: 25px;
+    gap: 15px;
+    flex-wrap: wrap;
 }
 
 .stat-box {
+    min-width: 110px;
+    padding: 14px 16px;
+
     text-align: center;
-    padding: 10px 20px;
-    background: rgba(255, 255, 255, 0.1);
+
+    background: rgba(255, 255, 255, 0.15);
     border: 3px solid var(--border-color);
-    min-width: 100px;
+    border-radius: 0;
+    box-shadow: 4px 4px 0 var(--border-color);
 }
 
 .stat-value {
-    font-size: 24px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 22px;
+
     color: var(--gold-accent);
     text-shadow: 2px 2px 0 var(--border-color);
-    margin-bottom: 5px;
+
+    margin-bottom: 8px;
 }
 
 .stat-label {
-    font-size: 20px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+
     color: var(--text-primary);
     text-shadow: 1px 1px 0 var(--border-color);
+
     text-transform: uppercase;
     letter-spacing: 1px;
 }
@@ -5630,7 +5723,7 @@ body::after {
 }
 
 .instructions {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--text-primary);
     text-shadow: 1px 1px 0 var(--border-color);
     max-width: 600px;
@@ -5677,6 +5770,7 @@ body::after {
     font-size: 18px;
     color: var(--gold-accent);
     text-shadow: 2px 2px 0 var(--border-color);
+    font-weight: bold;
     text-align: center;
     margin-bottom: 20px;
     padding: 10px;
@@ -5684,19 +5778,26 @@ body::after {
     border: 3px solid var(--border-color);
 }
 
-.word-card, .definition-card {
-    background: rgba(255, 255, 255, 0.1);
-    border: 4px solid var(--border-color);
-    padding: 30px 20px;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-    box-shadow: 6px 6px 0 var(--border-color);
-    min-height: 100px;
+.word-card,
+.definition-card {
     display: flex;
     align-items: center;
-    justify-content: center;
-    text-align: center;
+    justify-content: flex-start;
+
+    width: 100%;
+    min-height: 70px;
+
+    padding: 16px 18px;
+
+    border: 3px solid var(--border-color);
+    box-shadow: 5px 5px 0 var(--border-color);
+
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    line-height: 1.5;
+
+    cursor: pointer;
+    transition: all 0.15s;
 }
 
 .word-card:hover:not(.matched):not(.selected), 
@@ -5739,18 +5840,18 @@ body::after {
 }
 
 .card-content {
-    font-size: 20px;
+    font-size: 16px;
     line-height: 1.6;
-    text-shadow: 2px 2px 0 var(--border-color);
+    text-shadow: 1px 1px 0 var(--border-color);
     pointer-events: none;
 }
 
 .matched .card-content {
-    text-shadow: 2px 2px 0 #2E7D32;
+    text-shadow: 1px 1px 0 #2E7D32;
 }
 
 .selected .card-content {
-    text-shadow: 2px 2px 0 var(--border-color);
+    text-shadow: 1px 1px 0 var(--border-color);
 }
 
 /* Game Controls */
@@ -5760,8 +5861,7 @@ body::after {
     align-items: center;
     margin-top: 40px;
     padding: 25px;
-    background: rgba(0, 0, 0, 0.7);
-    border: 4px solid var(--border-color);
+    border: 3px solid var(--border-color);
     box-shadow: 6px 6px 0 var(--border-color);
 }
 
@@ -5769,7 +5869,7 @@ body::after {
     background: var(--button-primary);
     color: white;
     border: 4px solid var(--border-color);
-    padding: 15px 35px;
+    padding: 15px 20px;
     border-radius: 0;
     font-size: 14px;
     font-weight: bold;
@@ -6327,19 +6427,53 @@ body::after {
 }
 
 /* Button */
-.modal-content button {
+/* BACK BUTTON (blue) */
+.modal-content .btn-back {
     width: 100%;
-    padding: 10px;
-    background: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 6px;
+    background: var(--button-secondary);
+    color: #fff;
+    border: 3px solid var(--border-color);
+    padding: 12px;
+    font-size: 10px;
+    box-shadow: 4px 4px 0 var(--border-color);
     cursor: pointer;
-    font-size: 16px;
+    font-family: 'Press Start 2P', monospace;
+    text-transform: uppercase;
+    transition: all 0.2s;
 }
 
-.modal-content button:hover {
-    background: #45a049;
+.modal-content .btn-back:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--border-color);
+    background: #3159d1;
+}
+
+/* START FLASHCARDS (red) */
+.modal-content .btn-start {
+    width: 100%;
+    background: var(--button-primary);
+    color: #fff;
+    border: 3px solid var(--border-color);
+    padding: 12px;
+    font-size: 10px;
+    box-shadow: 4px 4px 0 var(--border-color);
+    cursor: pointer;
+    font-family: 'Press Start 2P', monospace;
+    text-transform: uppercase;
+    transition: all 0.2s;
+}
+
+.modal-content .btn-start:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--border-color);
+    background: var(--button-hover);
+}
+
+/* CLICK PRESS EFFECT (both) */
+.modal-content .btn-back:active,
+.modal-content .btn-start:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 var(--border-color);
 }
 
 /* Animation */
