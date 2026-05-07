@@ -172,6 +172,10 @@
         background: #ff4444;
     }
 
+    .action-btn.green {
+        background: #76c442;
+    }
+
 
     .logout-btn {
             background: #ff4444;
@@ -466,7 +470,7 @@
                                 {% if user.is_active %}
                                     <a href="{{ url_for('user_action_redirect', user_id=user.user_id, action='deactivate', search=search_term, status=status_filter, date_from=date_from, date_to=date_to, page=current_page) }}" class="action-btn red">Deactivate</a>
                                 {% else %}
-                                    <a href="{{ url_for('user_action_redirect', user_id=user.user_id, action='activate', search=search_term, status=status_filter, date_from=date_from, date_to=date_to, page=current_page) }}" class="action-btn">Activate</a>
+                                    <a href="{{ url_for('user_action_redirect', user_id=user.user_id, action='activate', search=search_term, status=status_filter, date_from=date_from, date_to=date_to, page=current_page) }}" class="action-btn green">Activate</a>
                                 {% endif %}
                             </div>
                         </td>
@@ -668,27 +672,6 @@
 
     // Set default date values to current month
     window.onload = function() {
-        const today = new Date();
-        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-       
-        // Format dates as YYYY-MM-DD
-        const formatDate = (date) => {
-            return date.toISOString().split('T')[0];
-        };
-       
-        // Only set defaults if the fields are empty
-        const dateFromInput = document.getElementById('dateFrom');
-        const dateToInput = document.getElementById('dateTo');
-       
-        if (dateFromInput && !dateFromInput.value) {
-            dateFromInput.value = formatDate(firstDay);
-        }
-       
-        if (dateToInput && !dateToInput.value) {
-            dateToInput.value = formatDate(today);
-        }
-       
-        // Auto-show view modal if needed
         {% if show_view_modal and view_form %}
         document.getElementById('viewUserModal').classList.add('active');
         {% endif %}

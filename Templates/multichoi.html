@@ -93,10 +93,9 @@
 
             <!-- Controls -->
             <div class="quiz-controls">
-                <button class="control-btn" id="prev-btn" onclick="previousQuestion()" disabled>
-                    ← Previous
-                </button>
-               
+               <button>
+                
+               </button>
                 <div class="streak-display">
                     <div class="streak-icon">🔥</div>
                     <div class="streak-info">
@@ -182,7 +181,7 @@
         const progressFill = document.getElementById('progress-fill');
         const progressPercent = document.getElementById('progress-percent');
         const timerDisplay = document.getElementById('timer');
-        const prevBtn = document.getElementById('prev-btn');
+
         const nextBtn = document.getElementById('next-btn');
         const expPopup = document.getElementById('expPopup');
         const expAmount = document.getElementById('expAmount');
@@ -216,7 +215,6 @@
             optionsGrid.innerHTML = '<div class="error-message">You haven\'t added any words to review yet. Go to \'Add New Word\' to start building your vocabulary!</div>';
             explanationText.textContent = "Please add words first.";
             explanationBox.classList.add('show');
-            prevBtn.disabled = true;
             nextBtn.disabled = true;
         }
 
@@ -225,7 +223,6 @@
             optionsGrid.innerHTML = '<div class="error-message">' + message + '</div>';
             explanationText.textContent = "Please try again later.";
             explanationBox.classList.add('show');
-            prevBtn.disabled = true;
             nextBtn.disabled = true;
         }
 
@@ -313,7 +310,6 @@
             isAnswered = false;
             selectedOption = null;
             explanationBox.classList.remove('show');
-            prevBtn.disabled = currentQuestionIndex === 0;
             nextBtn.disabled = true;
             
             // Update question info
@@ -419,15 +415,6 @@
                 startTimer();
             } else {
                 showResults();
-            }
-        }
-
-        // Previous Question
-        function previousQuestion() {
-            if (currentQuestionIndex > 0) {
-                currentQuestionIndex--;
-                loadQuestion();
-                startTimer();
             }
         }
 

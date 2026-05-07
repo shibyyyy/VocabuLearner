@@ -37,6 +37,13 @@
                 <span class="error">{{ error }}</span>
             {% endfor %}
 
+            {% if info_message %}
+    <div class="flash-message flash-info">
+        <span class="flash-icon">ℹ️</span>
+        <span class="flash-text">{{ info_message }}</span>
+    </div>
+{% endif %}
+
             <!-- Submit button -->
             {{ form.submit }}
 
@@ -80,4 +87,32 @@
     <footer class="footer">
         <p>© 2025 VocabuLearner</p>
     </footer>
+
+    <style>
+        .login-form .error {
+    display: block;
+    width: fit-content;
+    max-width: 90%;
+
+    margin: 4px auto 10px;
+    padding: 5px 12px;
+
+    background-color: #ff5757;
+    color: #ffffff;
+
+    border: 2px solid #e53935;
+    border-radius: 10px;
+
+    font-size: 11px;
+    font-family: 'Press Start 2P', monospace;
+
+    text-align: center;
+
+    box-shadow: 4px 4px 0 #000;
+}
+
+.login-form .error::before {
+    content: "⚠ ";
+}
+    </style>
 {% endblock %}

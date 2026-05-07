@@ -41,7 +41,6 @@
                     <span class="label">Total Words</span>
                     <span class="value">{{ words|length }} Words</span>
                 </div>
-                <!-- You can compute mastered/review stats in Python and pass them in -->
             </div>
         </div>
 
@@ -59,27 +58,32 @@
         <div class="words-grid" id="wordsGrid">
             {% for user_word, vocab, ph_date in words %}
             <div class="word-card2"
-                onclick="openWordModal('{{ vocab.word }}',
-                                '{{ vocab.definition }}',
-                                '{{ vocab.example_sentence }}',
-                                '{{ ph_date }}',
-                                '{{ vocab.word_id }}')">
+                onclick='openWordModal(
+                    {{ vocab.word.capitalize()|tojson }},
+                    {{ vocab.definition|tojson }},
+                    {{ vocab.example_sentence|tojson }},
+                    {{ ph_date|tojson }},
+                    {{ vocab.word_id|tojson }}
+                )'">
 
+                <div class="word-header">
+                    <h3 class="word-text">{{ vocab.word.capitalize() }}</h3>
+                    <span class="word-type">{{ vocab.category or "N/A" }}</span>
+                </div>
 
-            <div class="word-header">
-                            <h3 class="word-text">{{ vocab.word }}</h3>
-                            <span class="word-type">{{ vocab.category or "N/A" }}</span>
-                        </div>
-                        <p class="word-definition">{{ vocab.definition }}</p>
-                        <div class="word-example">"{{ vocab.example_sentence }}"</div>
-                        <div class="word-stats">
-                            <span>🟡 Learned</span>
-                            <!-- Use ph_date instead of user_word.date_learned -->
-                            <span>📅 {{ ph_date }}</span>
-                        </div>
-                    </div>
-                {% endfor %}
+                <p class="word-definition">{{ vocab.definition }}</p>
+
+                <div class="word-example">
+                    "{{ vocab.example_sentence }}"
+                </div>
+
+                <div class="word-stats">
+                    <span>🟡 Learned</span>
+                    <span>📅 {{ ph_date }}</span>
+                </div>
             </div>
+            {% endfor %}
+        </div>
 
 
         <!-- WordBank Actions -->
@@ -93,21 +97,62 @@
     <!-- Word Detail Modal -->
     <div class="modal2" id="wordModal">
         <div class="modal2-content">
+
             <div class="modal2-header">
                 <h2 class="modal2-title" id="modalWord"></h2>
                 <span class="modal2-type" id="modalType"></span>
             </div>
+
+            <!-- DISPLAY MODE -->
             <p class="modal2-definition" id="modalDefinition"></p>
             <div class="modal2-example" id="modalExample"></div>
+
+            <!-- EDIT MODE -->
+            <div id="editWordForm" style="display:none; margin-top:15px;">
+
+                <label style="display:block; margin-bottom:8px;">
+                    Meaning
+                </label>
+
+                <textarea
+                    id="editDefinition"
+                    class="search-box"
+                    style="width:100%; min-height:100px;"
+                ></textarea>
+
+                <label style="display:block; margin-top:15px; margin-bottom:8px;">
+                    Example Sentence
+                </label>
+
+                <textarea
+                    id="editExample"
+                    class="search-box"
+                    style="width:100%; min-height:100px;"
+                ></textarea>
+
+            </div>
+
             <div class="modal2-stats">
                 <div class="modal2-stat">
                     <span class="modal2-stat-label">Added On</span>
                     <span class="modal2-stat-value" id="modalDate"></span>
                 </div>
             </div>
+
             <div class="modal2-actions">
-                <button class="btn-close" onclick="closeWordModal()">CLOSE</button>
+                <button class="btn-primary1" id="editBtn" onclick="enableEditWord()">
+                    EDIT
+                </button>
+
+                <button class="btn-primary1" id="saveBtn" onclick="saveWordEdit()" style="display:none;">
+                    SAVE
+                </button>
+
+                <button class="btn-close" onclick="closeWordModal()">
+                    CLOSE
+                </button>
             </div>
+
         </div>
     </div>
 
@@ -115,9 +160,15 @@
         <div class="admin-modal-box">
             <h2>Confirm Logout</h2>
             <p>Are you sure you want to logout?</p>
+
             <div class="admin-modal-actions">
-                <button class="admin-modal-confirm-btn" onclick="performLogout()">Yes, Logout</button>
-                <button class="admin-modal-cancel-btn" onclick="closeLogoutModal()">Cancel</button>
+                <button class="admin-modal-confirm-btn" onclick="performLogout()">
+                    Yes, Logout
+                </button>
+
+                <button class="admin-modal-cancel-btn" onclick="closeLogoutModal()">
+                    Cancel
+                </button>
             </div>
         </div>
     </div>
@@ -142,7 +193,7 @@
             border: 3px solid #000;
             border-radius: 0;
             cursor: pointer;
-            /* pixel shadow */
+
             box-shadow: 4px 4px 0 #000;
             transition: none;
             margin-bottom: 10px;
@@ -150,8 +201,6 @@
 
         .back-button:hover {
             background: #3159d1;
-
-            /* pressed effect */
             transform: translate(2px, 2px);
             box-shadow: 2px 2px 0 #000;
         }
@@ -160,43 +209,156 @@
             transform: translate(4px, 4px);
             box-shadow: 0px 0px 0 #000;
         }
+
+        #editWordForm label {
+            color: #000;
+        }
+
+        #editDefinition,
+        #editExample {
+            color: #000;
+        }
+
+        #editDefinition::placeholder,
+        #editExample::placeholder {
+            color: #000;
+            opacity: 1;
+        }
     </style>
 
+
     <script>
+
         let currentWordId = null;
 
+        // Open word detail modal
+        function openWordModal(word, definition, example, date, id) {
 
-// Open word detail modal
-function openWordModal(word, definition, example, date, id) {
-    document.getElementById('modalWord').textContent = word;
-    document.getElementById('modalDefinition').textContent = definition;
-    document.getElementById('modalExample').textContent = `"${example}"`;
-    document.getElementById('modalDate').textContent = date;
-    document.getElementById('wordModal').classList.add('active');
+            document.getElementById('modalWord').textContent = word;
 
+            document.getElementById('modalDefinition').textContent = definition;
 
-    currentWordId = id; // store the word id
-}
+            document.getElementById('modalExample').textContent = `"${example}"`;
 
+            document.getElementById('modalDate').textContent = date;
 
-// Close word detail modal
-function closeWordModal() {
-    document.getElementById('wordModal').classList.remove('active');
-    currentWordId = null;
-}
+            document.getElementById('wordModal').classList.add('active');
 
+            document.getElementById('editDefinition').value = definition;
+
+            document.getElementById('editExample').value = example;
+
+            document.getElementById('editWordForm').style.display = 'none';
+
+            document.getElementById('modalDefinition').style.display = 'block';
+
+            document.getElementById('modalExample').style.display = 'block';
+
+            document.getElementById('editBtn').style.display = 'inline-block';
+
+            document.getElementById('saveBtn').style.display = 'none';
+
+            currentWordId = id;
+        }
+
+        // Enable edit mode
+        function enableEditWord() {
+
+            document.getElementById('editWordForm').style.display = 'block';
+
+            document.getElementById('modalDefinition').style.display = 'none';
+
+            document.getElementById('modalExample').style.display = 'none';
+
+            document.getElementById('editBtn').style.display = 'none';
+
+            document.getElementById('saveBtn').style.display = 'inline-block';
+        }
+
+        // Save edited word
+        async function saveWordEdit() {
+
+            const definition = document.getElementById('editDefinition').value.trim();
+
+            const example = document.getElementById('editExample').value.trim();
+
+            const word = document.getElementById('modalWord')
+            .textContent
+            .trim()
+            .toLowerCase();
+            
+            if (!definition || !example) {
+                alert("Meaning and sentence cannot be empty.");
+                return;
+            }
+
+            // Proper sentence validation
+            const sentenceRegex = /^[A-Z].*[.!?]$/;
+
+            // Validate meaning
+            if (!sentenceRegex.test(definition)) {
+                alert("Meaning must start with a capital letter and end with proper punctuation.");
+                return;
+            }
+
+            // Validate example sentence
+            if (!sentenceRegex.test(example)) {
+                alert("Example sentence must start with a capital letter and end with proper punctuation.");
+                return;
+            }
+
+            // NEW: sentence must contain the word
+            if (!example.toLowerCase().includes(word)) {
+                alert(`Example sentence must include the word "${word}".`);
+                return;
+            }
+
+            const response = await fetch(`/api/update_word/${currentWordId}`, {
+                method: 'PUT',
+
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+
+                body: JSON.stringify({
+                    definition: definition,
+                    example_sentence: example
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert("Word updated successfully!");
+                location.reload();
+            } else {
+                alert(data.error || "Failed to update word.");
+            }
+        }
+
+        // Close word detail modal
+        function closeWordModal() {
+
+            document.getElementById('wordModal').classList.remove('active');
+
+            currentWordId = null;
+        }
 
         // Search functionality
         document.getElementById('searchInput').addEventListener('input', filterWords);
 
         function filterWords() {
+
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
             const cards = document.querySelectorAll('.word-card2');
 
             cards.forEach(card => {
+
+                // ONLY SEARCH THE WORD ITSELF
                 const word = card.querySelector('.word-text').textContent.toLowerCase();
-                const definition = card.querySelector('.word-definition').textContent.toLowerCase();
-                const matchesSearch = word.includes(searchTerm) || definition.includes(searchTerm);
+
+                const matchesSearch = word.includes(searchTerm);
 
                 if (matchesSearch) {
                     card.style.display = '';
@@ -207,24 +369,32 @@ function closeWordModal() {
         }
 
         function showLogoutConfirm() {
+
             const logoutModal = document.getElementById('logoutModal');
+
             if (logoutModal) {
                 logoutModal.classList.add('active');
             }
         }
 
         function closeLogoutModal() {
+
             const logoutModal = document.getElementById('logoutModal');
+
             if (logoutModal) {
                 logoutModal.classList.remove('active');
             }
         }
 
         function performLogout() {
+
             localStorage.clear();
+
             sessionStorage.clear();
+
             window.location.href = "/logout";
         }
 
     </script>
+
 {% endblock %}

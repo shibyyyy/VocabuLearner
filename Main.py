@@ -6,7 +6,7 @@ from models import db,UserAcc, UserAchievement, UserWords, Pokemon, Achievement,
 from functools import wraps
 import os
 from sqlalchemy import or_, and_  
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, timezone
 import pytz
 from sqlalchemy.sql import func
 import random, requests
@@ -175,47 +175,47 @@ def send_verification_email(old_email, new_email, verification_code):
     except Exception:
         return False
 
+ph_timezone = pytz.timezone('Asia/Manila')
+
 def update_user_streak(user):
-    
-    # Skip streak updates for admin users
-    if hasattr(user, 'is_admin') and user.is_admin:
-        return
-    
-    today = datetime.now(ph_timezone).date()
-    
-    # ALWAYS set streak to 1 if it's 0 (from default)
-    if user.current_streak == 0:
+
+    # Current Philippine time
+    server_now = datetime.now(ph_timezone)
+
+    # First login
+    if user.last_login is None:
         user.current_streak = 1
         user.longest_streak = 1
-        user.last_login = datetime.now(ph_timezone)
+        user.last_login = server_now
         return
-    
-    # If first login ever
-    if not user.last_login:
-        user.current_streak = 1
-        user.longest_streak = 1
-        user.last_login = datetime.now(ph_timezone)
-        return
-    
-    # Convert last_login to Philippine timezone
-    if user.last_login.tzinfo is None:
-        last_login_ph = pytz.utc.localize(user.last_login).astimezone(ph_timezone)
-    else:
-        last_login_ph = user.last_login.astimezone(ph_timezone)
-    
-    last_login_date = last_login_ph.date()
-    days_difference = (today - last_login_date).days
-    
-    if days_difference == 1:
-        # Consecutive day
+
+    # Convert previous login to PH time
+    last_login = user.last_login.astimezone(ph_timezone)
+
+    # Compare dates only
+    last_day = last_login.date()
+    current_day = server_now.date()
+
+    day_difference = (current_day - last_day).days
+
+    # Same day → no streak change
+    if day_difference == 0:
+        pass
+
+    # Consecutive day → increment streak
+    elif day_difference == 1:
         user.current_streak += 1
-        if user.current_streak > user.longest_streak:
-            user.longest_streak = user.current_streak
-        user.last_login = datetime.now(ph_timezone)
-    elif days_difference > 1:
-        # Streak broken
+
+    # Missed one or more days → reset streak
+    else:
         user.current_streak = 1
-        user.last_login = datetime.now(ph_timezone)
+
+    # Update longest streak
+    if user.current_streak > user.longest_streak:
+        user.longest_streak = user.current_streak
+
+    # ALWAYS update last_login
+    user.last_login = server_now
 
 def check_and_update_achievements(user):
     """Check all achievements and award them if user qualifies."""
@@ -397,10 +397,6 @@ def login():
                 # Update streak FIRST
                 update_user_streak(user)
                 
-                # UPDATE LAST LOGIN in Philippine Time
-                pht = pytz.timezone('Asia/Manila')
-                user.last_login = datetime.now(pht)
-                
                 # Store user info
                 session['user_id'] = user.user_id
                 session['username'] = user.name
@@ -411,11 +407,6 @@ def login():
                 
                 # CHECK ACHIEVEMENTS AFTER LOGIN (Journey Begins if not already)
                 check_and_update_achievements(user)
-                
-                # Log success
-                print(f"LOGIN: User {user.user_id} ({user.name}) logged in")
-                print(f"LAST_LOGIN (PHT): Updated to {user.last_login}")
-                print(f"STREAK: Current streak: {user.current_streak}")
                 
                 if user.is_admin:
                     return redirect(url_for('admin_dashboard'))
@@ -431,30 +422,28 @@ def login():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     form = SignupForm()
+
     if form.validate_on_submit():
+
         # Check if passwords match
         if form.password.data != form.confirm_password.data:
-            flash("Passwords do not match.", "danger")
+            form.confirm_password.errors.append("Passwords do not match.")
             return render_template('signup.html', form=form)
-
 
         # Check if email already exists
         existing_email = UserAcc.query.filter_by(email=form.email.data).first()
         if existing_email:
-            flash("This email is already registered. Please log in.", "danger")
+            form.email.errors.append("This email is already registered. Please log in.")
             return render_template('signup.html', form=form)
-
 
         # Check if username already exists
         existing_name = UserAcc.query.filter_by(name=form.username.data).first()
         if existing_name:
-            flash("This username is already taken. Please choose a different one.", "danger")
+            form.username.errors.append("This username is already taken. Please choose a different one.")
             return render_template('signup.html', form=form)
-
 
         # Hash the password
         hashed_pw = generate_password_hash(form.password.data)
-
 
         # Create new user
         new_user = UserAcc(
@@ -462,38 +451,36 @@ def signup():
             email=form.email.data,
             password=hashed_pw
         )
+
         db.session.add(new_user)
-        
+
         try:
-            # CREATE USERACHIEVEMENT ENTRIES FOR NEW USER
+            db.session.flush()
+
+            # Create UserAchievement entries for new user
             if not new_user.is_admin:
                 all_achievements = Achievement.query.all()
+
                 for achievement in all_achievements:
                     user_achievement = UserAchievement(
-            user_id=new_user.user_id,
-            achievement_id=achievement.achievement_id,
-            current_progress=0,
-            date_earned=None
-            )
-            db.session.add(user_achievement)
-            
+                        user_id=new_user.user_id,
+                        achievement_id=achievement.achievement_id,
+                        current_progress=0,
+                        date_earned=None
+                    )
+                    db.session.add(user_achievement)
+
             db.session.commit()
-            
-            # CHECK ACHIEVEMENTS AFTER ACCOUNT CREATION (Journey Begins)
+
+            # Check achievements after account creation
             check_and_update_achievements(new_user)
-            
+
         except IntegrityError:
             db.session.rollback()
-            flash("This email or username is already registered. Please log in.", "warning")
-            return redirect(url_for('login'))
+            form.email.errors.append("This email or username is already registered.")
+            return render_template('signup.html', form=form)
 
         return redirect(url_for('login'))
-
-
-    # If validation fails (e.g. empty fields), WTForms will handle it.
-    if form.errors:
-        flash("Please correct the errors in the form.", "danger")
-
 
     return render_template('signup.html', form=form)
 
@@ -1262,6 +1249,9 @@ def add_to_collection(word_id):
         # Add word to user's collection with Philippine time
         user_word = UserWords(user_id=user.user_id, word_id=word_id, date_learned=ph_time)
         db.session.add(user_word)
+
+        update_user_streak(user)
+
         user.total_points = (user.total_points or 0) + word.points_value
         
         # Check if this is a Word of the Day
@@ -1317,6 +1307,51 @@ def wordbank():
         words_with_ph_time.append((user_word, vocab, date_str))
     
     return render_template("wordbank.html", words=words_with_ph_time)
+
+@app.route('/api/update_word/<int:word_id>', methods=['PUT'])
+@login_required
+def update_word(word_id):
+
+    user = get_current_user()
+
+    user_word = UserWords.query.filter_by(
+        user_id=user.user_id,
+        word_id=word_id
+    ).first()
+
+    if not user_word:
+        return jsonify({
+            'success': False,
+            'error': 'Word not found in your WordBank.'
+        }), 404
+
+    word = Vocabulary.query.filter_by(word_id=word_id).first()
+
+    if not word:
+        return jsonify({
+            'success': False,
+            'error': 'Vocabulary word not found.'
+        }), 404
+
+    data = request.get_json()
+
+    definition = data.get('definition')
+    example_sentence = data.get('example_sentence')
+
+    if not definition or not example_sentence:
+        return jsonify({
+            'success': False,
+            'error': 'Both fields are required.'
+        }), 400
+
+    word.definition = definition
+    word.example_sentence = example_sentence
+
+    db.session.commit()
+
+    return jsonify({
+        'success': True
+    })
 
 @app.route("/add_word", methods=["GET", "POST"])
 @login_required
@@ -1629,8 +1664,10 @@ def add_review_exp():
     try:
         data = request.get_json()
         exp_earned = data.get('exp_earned', 0)
-        
-        # Update user's total points
+
+        # FIX: reviewing counts as daily activity
+        update_user_streak(user)
+
         user.total_points = (user.total_points or 0) + exp_earned
         
         # Check for Pokémon evolution (optional)

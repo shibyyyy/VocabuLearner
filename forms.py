@@ -2,9 +2,8 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, TextAreaField, SelectField, IntegerField, BooleanField, DateField, SelectMultipleField, HiddenField
 from wtforms.validators import DataRequired, NumberRange, Length, Email, Optional, ValidationError, EqualTo
 from datetime import datetime
+from wtforms.fields import EmailField
 import re
-
-
 
 
 class LoginForm(FlaskForm):
@@ -28,10 +27,15 @@ class SignupForm(FlaskForm):
         validators=[DataRequired(),Length(min=4, max=25, message="Invalid username.")],
         render_kw={"placeholder": "Username"}
         )
-    email = StringField(
-        validators=[DataRequired(),Email(message="Invalid email address.")],
-        render_kw={"placeholder": "Email"}
-        )
+    email = EmailField(
+        validators=[
+            DataRequired(),
+            Email(message="Please enter a valid email address.")
+        ],
+        render_kw={
+            "placeholder": "Email"
+        }
+    )
     password = PasswordField(
         validators=[DataRequired(),Length(min=8, message="Password must be at least 8 characters long.")],
         render_kw={"placeholder": "Password"}
@@ -177,18 +181,22 @@ class UserSearchForm(FlaskForm):
     )
     
     def validate(self, extra_validators=None):
-        """Custom validation for date range"""
-        # Run standard validation first
         initial_validation = super().validate(extra_validators=extra_validators)
+
         if not initial_validation:
             return False
-            
+
+        # Stop empty Search button submits
+        if self.submit.data and not self.search.data.strip():
+            self.search.errors.append("Search field cannot be empty.")
+            return False
+
         # Custom validation for date range
         if self.date_from.data and self.date_to.data:
             if self.date_from.data > self.date_to.data:
                 self.date_from.errors.append('"From" date cannot be later than "To" date')
                 return False
-                
+
         return True
 
 class UserActionForm(FlaskForm):

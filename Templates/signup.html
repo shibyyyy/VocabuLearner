@@ -41,36 +41,40 @@
     {% endwith %}
 
     <form class="signup-form" method="POST">
-        {{ form.hidden_tag() }}
+    {{ form.hidden_tag() }}
 
-        {{ form.username(placeholder="Username") }}
-        {% for error in form.username.errors %}
-            <span class="error">{{ error }}</span>
+    {% set all_errors = [] %}
+
+    {% for field in [form.username, form.email, form.password, form.confirm_password] %}
+        {% for error in field.errors %}
+            {% set _ = all_errors.append(error) %}
         {% endfor %}
+    {% endfor %}
 
-        {{ form.email(placeholder="Email") }}
-        {% for error in form.email.errors %}
-            <span class="error">{{ error }}</span>
-        {% endfor %}
-
-        <div class="password-wrapper">
-            {{ form.password(placeholder="Password", id="password-field") }}
-            <button type="button" id="toggle-password" class="toggle-btn">👁</button>
+    {% if all_errors %}
+        <div class="form-error-box">
+            {% for error in all_errors %}
+                <div class="form-error-item">⚠ {{ error }}</div>
+            {% endfor %}
         </div>
-        {% for error in form.password.errors %}
-            <span class="error">{{ error }}</span>
-        {% endfor %}
+    {% endif %}
 
-        <div class="password-wrapper">
-            {{ form.confirm_password(placeholder="Confirm Password", id="confirm-password-field") }}
-            <button type="button" id="toggle-confirm-password" class="toggle-btn">👁</button>
-        </div>
-        {% for error in form.confirm_password.errors %}
-            <span class="error">{{ error }}</span>
-        {% endfor %}
+    {{ form.username(placeholder="Username") }}
 
-        {{ form.submit(class="btn-primary") }}
-    </form>
+    {{ form.email(type="email", placeholder="Email") }}
+
+    <div class="password-wrapper">
+        {{ form.password(placeholder="Password", id="password-field") }}
+        <button type="button" id="toggle-password" class="toggle-btn">👁</button>
+    </div>
+
+    <div class="password-wrapper">
+        {{ form.confirm_password(placeholder="Confirm Password", id="confirm-password-field") }}
+        <button type="button" id="toggle-confirm-password" class="toggle-btn">👁</button>
+    </div>
+
+    {{ form.submit(class="btn-primary") }}
+</form>
 
     <div class="signup-footer">
         Already have an account? <a href="{{ url_for('login') }}">Log In</a>
@@ -116,4 +120,37 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+<style>
+    .form-error-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+
+    width: fit-content;
+    max-width: 90%;
+
+    margin: 5px auto;
+    margin-top: 1px;
+    padding: 5px 40px;
+
+    background-color: #ff5757;
+    color: #ffffff;
+
+    border: 2px solid #e53935; /* match flash-error border */
+    border-radius: 10px;
+
+    font-size: 11px;
+    font-family: 'Press Start 2P', monospace;
+
+    box-shadow: 4px 4px 0 #000;
+}
+
+.form-error-item {
+    color: #ffffff; /* match flash text color */
+    line-height: 1.6;
+}
+</style>
 {% endblock %}
+

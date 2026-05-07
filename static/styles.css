@@ -430,7 +430,7 @@ body::after {
 .nav-links a {
     color: var(--text-primary);
     text-decoration: none;
-    font-size: 15px;
+    font-size: 14px;
     text-shadow: 2px 2px 0 var(--border-color);
     transition: all 0.2s;
     padding: 8px 16px;
@@ -919,7 +919,7 @@ body::after {
 
 .signup-container { margin-top: 150px; max-width: 500px; background: var(--card-bg-light); backdrop-filter: blur(10px); border: 4px solid var(--border-color); padding: 40px; margin-left: auto; margin-right: auto; box-shadow: 8px 8px 0 var(--border-color); text-align: center; }
 .signup-container h1 { font-size: 32px; margin-bottom: 20px; text-shadow: 4px 4px 0 var(--border-color); color: var(--gold-accent); letter-spacing: 2px; }
-.signup-container p { font-size: 12px; margin-bottom: 30px; color: var(--text-primary); text-shadow: 2px 2px 0 var(--border-color); }
+.signup-container p { font-size: 15px; margin-bottom: 30px; color: var(--text-primary); text-shadow: 2px 2px 0 var(--border-color); }
 
 .signup-form { display: flex; flex-direction: column; gap: 20px; }
 .signup-form input { padding: 15px; font-size: 12px; font-family: 'Press Start 2P', monospace; border: 4px solid var(--border-color); outline: none; }
@@ -928,7 +928,7 @@ body::after {
 .btn-primary:hover { transform: translate(3px,3px); box-shadow: 3px 3px 0 var(--border-color); }
 .btn-primary:active { transform: translate(6px,6px); box-shadow: 0 0 0 var(--border-color); }
 
-.signup-footer { font-size: 14px; color: var(--text-primary); text-shadow: 2px 2px 0 var(--border-color); margin-top: 15px; }
+.signup-footer { font-size: 14px; color: var(--text-primary); text-shadow: 2px 2px 0 var(--border-color); margin-top: 20px; }
 .signup-footer a { color: var(--gold-accent); text-decoration: none; font-size: 14px; }
 .signup-footer a:hover { text-decoration: underline; }
 
@@ -964,11 +964,11 @@ body::after {
     margin-bottom: 20px; 
 }
 .features-hero p { 
-    font-size: 13px; 
+    font-size: 18px; 
     line-height: 1.8; 
     color: var(--text-primary); 
-    text-shadow: 1px 1px 0 var(--border-color); 
-    max-width: 800px;
+    text-shadow: 2px 2px 0 var(--border-color); 
+    max-width: 1200px;
     margin: 0 auto;
 }
 
@@ -1012,15 +1012,16 @@ body::after {
 }
 
 .feature-content2 h2 { 
-    font-size: 20px; 
+    font-size: 25px; 
     color: var(--gold-accent); 
     text-shadow: 3px 3px 0 var(--border-color); 
     margin-bottom: 15px; 
 }
 
 .feature-content2 p { 
-    font-size: 14px; 
+    font-size: 20px; 
     line-height: 1.8; 
+    font-weight: bold;
     color: var(--text-primary); 
     text-shadow: 2px 2px 0 var(--border-color); 
     margin-bottom: 15px;
@@ -1032,7 +1033,8 @@ body::after {
 }
 
 .feature-list li { 
-    font-size: 14px; 
+    font-size: 19px; 
+    font-weight: bold;
     color: var(--text-primary); 
     text-shadow: 1px 1px 0 var(--border-color); 
     margin-bottom: 10px; 
@@ -1054,9 +1056,9 @@ body::after {
     color: #fff;
     padding: 5px 10px;
     border: 2px solid var(--border-color);
-    font-size: 12px;
-    margin-top: 10px;
-    box-shadow: 2px 2px 0 var(--border-color);
+    font-size: 15px;
+    margin-top: 20px;
+    box-shadow: 3px 3px 0 var(--border-color);
 }
 
 /* CTA Section */
@@ -1078,7 +1080,7 @@ body::after {
 }
 
 .cta-section p {
-    font-size: 12px; 
+    font-size: 20px; 
     color: var(--text-primary); 
     text-shadow: 2px 2px 0 var(--border-color); 
     margin-bottom: 25px;
@@ -1692,7 +1694,7 @@ body::after {
     left: 0; 
     width: 100%; 
     height: 100%; 
-    background: rgba(0,0,0,0.9); 
+    background: rgba(0, 0, 0, 0.769); 
     z-index: 2000; 
     justify-content: center; 
     align-items: center; 
@@ -1862,8 +1864,10 @@ body::after {
 }
 .modal-content p { 
     font-size: 12px; 
+    font-weight: bold;
     color: #000; 
-    margin-bottom: 20px; 
+    margin-bottom: 15px; 
+    margin-top: 15px;
     line-height: 1.6; 
 }
 .btn-close { 
@@ -3149,7 +3153,7 @@ body::after {
 }
 
 .pokemon-name-large {
-    font-size: 18px;
+    font-size: 24px;
     font-weight: bold;
     color: var(--gold-accent);
     text-shadow: 2px 2px 0 var(--border-color);
@@ -3190,7 +3194,7 @@ body::after {
 }
 
 .stat-label {
-    font-size: 9px;
+    font-size: 12px;
     color: var(--gold-accent);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -3442,7 +3446,7 @@ body::after {
     }
     
     .stat-label {
-        font-size: 8px;
+        font-size: 12px;
     }
     
     .progress-header {
@@ -4744,7 +4748,7 @@ body::after {
 
 /* Footer */
 .footer { padding: 40px 50px; text-align: center; background: var(--header-bg); border-top: 4px solid var(--gold-accent); margin-top: 80px; }
-.footer p { color: var(--text-primary); text-shadow: 2px 2px 0 var(--border-color); font-size: 10px; }
+.footer p { color: var(--text-primary); text-shadow: 2px 2px 0 var(--border-color); font-size: 12px; }
 
 /* Pokémon Achievements Grid */
 .pokemon-achievements-grid {
@@ -4893,7 +4897,7 @@ body::after {
 
 .page-subtitle {
     text-align: center;
-    font-size: 14px;
+    font-size: 18px;
     color: var(--gold-accent);
     margin-bottom: 50px;
     text-shadow: 2px 2px 0 var(--border-color);
@@ -4969,7 +4973,7 @@ body::after {
 }
 
 .challenge-type-card p {
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.8;
     color: var(--text-primary);
     text-shadow: 1px 1px 0 var(--border-color);
@@ -4988,7 +4992,7 @@ body::after {
     align-items: flex-start;
     gap: 10px;
     margin-bottom: 15px;
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1.6;
     color: var(--text-primary);
     text-shadow: 1px 1px 0 var(--border-color);
@@ -5151,7 +5155,7 @@ body::after {
 
 .stat-label {
     font-family: 'Press Start 2P', monospace;
-    font-size: 9px;
+    font-size: 12px;
 
     color: var(--text-primary);
     text-shadow: 1px 1px 0 var(--border-color);
@@ -5702,7 +5706,7 @@ body::after {
 
 .stat-label {
     font-family: 'Press Start 2P', monospace;
-    font-size: 9px;
+    font-size: 18px;
 
     color: var(--text-primary);
     text-shadow: 1px 1px 0 var(--border-color);
@@ -6013,7 +6017,7 @@ body::after {
 .footer p {
     color: var(--text-primary);
     text-shadow: 2px 2px 0 var(--border-color);
-    font-size: 10px;
+    font-size: 13px;
     letter-spacing: 1px;
 }
 
@@ -6489,83 +6493,65 @@ body::after {
 }
 
 .flash-message {
-        display: flex;
-        align-items: center;
-        padding: 12px 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
-        font-size: 15px;
-        font-weight: 500;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        animation: slideIn 0.3s ease-out;
-        position: relative;
-        overflow: hidden;
-    }
-    
-.flash-message::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 5px;
-    }
-    
-.flash-danger, .flash-error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-    }
-    
-.flash-danger::before, .flash-error::before {
-    background-color: #dc3545;
-    }
-    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    padding: 6px 14px;
+    margin: 15px auto;
+
+    width: fit-content;
+    max-width: 90%;
+
+    background-color: #ff5757;
+    color: #ffffff;
+
+    border: 3px solid #e53935;
+    border-radius: 10px;
+
+    font-size: 11px;
+    font-family: 'Press Start 2P', monospace;
+
+    box-shadow: 4px 4px 0 #000;
+    animation: popIn 0.2s ease;
+}
+
+.flash-error,
+.flash-danger {
+    background-color: #ff5757;
+    color: #ffffff;
+    border-color: #e53935;
+}
+
 .flash-success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-    }
-    
-.flash-success::before {
-    background-color: #28a745;
-    }
-    
+    background-color: #57d17a;   /* green background */
+    color: #ffffff;
+    border-color: #2e7d32;
+}
+
 .flash-info {
-    background-color: #d1ecf1;
-    color: #0c5460;
-    border: 1px solid #bee5eb;
-    }
-    
-.flash-info::before {
-    background-color: #17a2b8;
-    }
-    
+    background-color: #daeaf3;
+    color: #000;
+    border-color: #1565c0;
+}
+
 .flash-icon {
-    font-size: 18px;
-    margin-right: 12px;
-    font-weight: bold;
-    }
-    
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
 .flash-text {
-    flex-grow: 1;
-    }
-    
+    color: inherit;  /* use parent color */
+}
+
 .flash-close {
     background: none;
     border: none;
-    font-size: 22px;
     cursor: pointer;
+    font-size: 16px;
     color: inherit;
-    opacity: 0.7;
-    padding: 0;
-    margin-left: 15px;
-    line-height: 1;
-    }
-    
-.flash-close:hover {
-    opacity: 1;
-    }
+}
     
 @keyframes slideIn {
     from {
