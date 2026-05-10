@@ -636,18 +636,12 @@
         // Close popup and reset game
         btnClosePopup.addEventListener('click', function() {
             expPopup.classList.remove('active');
-            // Shuffle vocabulary and restart game
-            shuffleVocabulary();
-            initGame();
+            loadVocabulary();
         });
 
         // Restart the game
         btnRestart.addEventListener('click', function() {
-            // Hide completion message
-            completionMessage.style.display = 'none';
-            // Shuffle vocabulary for new game
-            shuffleVocabulary();
-            initGame();
+            loadVocabulary();
         });
 
         // Shuffle vocabulary array
@@ -676,7 +670,9 @@
         }
 
         function performLogout() {
-            window.location.href = "{{ url_for('logout') }}";
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = "/logout";
         }
         
     </script>

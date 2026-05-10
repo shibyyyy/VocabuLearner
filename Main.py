@@ -1292,15 +1292,7 @@ def wordbank():
     for user_word, vocab in user_words:
         # Convert date_learned to Philippine Time
         if user_word.date_learned:
-            # If date_learned is naive (no timezone), assume UTC
-            if user_word.date_learned.tzinfo is None:
-                date_utc = pytz.utc.localize(user_word.date_learned)
-            else:
-                date_utc = user_word.date_learned
-                
-            # Convert to Philippine Time
-            date_ph = date_utc.astimezone(ph_tz)
-            date_str = date_ph.strftime('%Y-%m-%d')
+            date_str = user_word.date_learned.strftime('%Y-%m-%d')
         else:
             date_str = "Unknown"
         
@@ -1499,9 +1491,6 @@ def review():
                          words_count=len(words_data))
 
     
-    
-
-
 @app.route('/flashcard')
 @login_required
 def flashcard():
@@ -1520,7 +1509,6 @@ def flashcard():
     return render_template('flashcard.html',
                          words=words_data,
                          words_count=len(words_data))
-
    
 
 @app.route('/multichoi')
@@ -1619,10 +1607,7 @@ def get_vocabulary_for_review():
         
         # If user has learned words, get words they haven't learned yet
         # Otherwise, get all words
-        if user_learned_word_ids:
-            words = Vocabulary.query.filter(~Vocabulary.word_id.in_(user_learned_word_ids)).all()
-        else:
-            words = Vocabulary.query.all()
+        words = Vocabulary.query.all()
         
         # Convert to list of dictionaries
         words_list = []
@@ -3705,7 +3690,8 @@ def get_common_pokemon_for_starter():
                 'name': pokemon.name,
                 'url': pokemon.url or '',
                 'rarity': pokemon.rarity,
-                'family_id': pokemon.family_id
+                'family_id': pokemon.family_id,
+                'min_points_required': pokemon.min_points_required
             })
         
         return jsonify({
@@ -3835,14 +3821,7 @@ def wotd_list_api():
 
     if search_term:
         like_term = f"%{search_term}%"
-        query = query.filter(
-            or_(
-                Vocabulary.word.ilike(like_term),
-                Vocabulary.definition.ilike(like_term),
-                Vocabulary.example_sentence.ilike(like_term),
-                Vocabulary.category.ilike(like_term)
-            )
-        )
+        query = query.filter(Vocabulary.word.ilike(like_term))
 
     query = query.order_by(Vocabulary.word.asc())
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)

@@ -1253,7 +1253,10 @@
                         
                         // Filter out common Pokémon whose family already has a starter
                         commonPokemon = commonPokemon.filter(pokemon => {
-                            return !starterFamilyIds.has(pokemon.family_id);
+                            return (
+                                pokemon.rarity === 'common' &&
+                                Number(pokemon.min_points_required) === 0
+                            );
                         });
                     }
                     
