@@ -507,7 +507,7 @@
         }
 
         function performLogout() {
-            navigateTo('{{ url_for('logout') }}');
+            window.location.href = "{{ url_for('logout') }}";;
         }
 
         function saveAchievement() {
